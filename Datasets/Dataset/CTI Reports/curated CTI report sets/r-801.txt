@@ -1,0 +1,3 @@
+As with a number of other HIDDEN COBRA developed tools, BLINDINGCAN is initially delivered via Microsoft Office attachments distributed in sophisticated spear-phishing campaigns. These attachments contain a number of XML directory files which, when the file is opened, connect to a delivery URL to download a preliminary DLL file.
+
+This DLL file then unpacks and decodes an embedded secondary DLL file using a hard-coded XOR key, before executing it. Upon execution, the secondary DLL decrypts two further embedded DLL files, containing BLINDINGCAN proper, using a hard-coded AES key before decoding and executing them.

@@ -1,0 +1,273 @@
+Infection vector
+
+Lokibot is commonly delivered through malicious spam (malspam) campaigns. There are numerous ways that the payload has been seen to be delivered through these spam mails:
+
+Executable is compressed inside an archive (e.g. ACE, ISO image files), which is attached to the e-mail. Malicious document files, which are attached to the e-mail, that download and drop the payload.
+
+Lokibot has been witnessed to exploit certain vulnerabilities in some of these attachment file formats, notably CVE-2017-11882, CVE-2018-0802, and CVE-2018-20250.
+
+Files & Mutexes
+
+Lokibot ensures that only a single instance of the malware is running on an infected system by creating a mutex. The mutex string is computed as the MD5 hash of the MachineGUID (obtained through registry).
+
+Additionally, Lokibot creates a folder which contains multiple files. The folder path is %AppData%/ <MD5_MACHINEGUID>[7:12]/.
+
+The folder contains:
+
+<MD5_MACHINEGUID>[12:17] .exe, copied payload. <MD5_MACHINEGUID>[12:17] .HDB, database file storing hashes of stolen credentials. <MD5_MACHINEGUID>[12:17] .LCK, lock file.
+
+Data Stealing
+
+This malware is notably known for stealing credentials from browsers, mail clients, file sharing programs, remote connection programs, and more. It also contains a keylogger component, which can be utilized by the malefactor.
+
+Lokibot is capable of stealing data from the following applications:
+
+1Password
+
+32BitFtp
+
+360Browser
+
+AbleFTP
+
+Automize7
+
+BitKinex
+
+Bitvise
+
+BlazeFTP
+
+Catalina Group Citrio
+
+CheckMail
+
+Chromium
+
+Cá»‘c Cá»‘c
+
+Comodo Chromodo
+
+Comodo Dragon
+
+Comodo IceDragon
+
+Coowon
+
+Cyberduck
+
+Cyberfox
+
+DeluxeFTP
+
+EasyFTP
+
+EnPass
+
+Epic Privacy Browser
+
+Estsoft ALFTP
+
+ExpanDrive
+
+FAR Manager
+
+Fasteam NETFile
+
+FileZilla
+
+FlashFXP
+
+FossaMail
+
+Foxmail
+
+FreshFTP
+
+FTP Navigator
+
+FTP Now
+
+FTPBox
+
+FTPGetter
+
+FtpInfo
+
+FTPShell
+
+FullSync
+
+Ghisler Total Commander
+
+GmailNotifierPro
+
+GoFTP
+
+Google Chrome
+
+Google Chrome SxS
+
+IncrediMail
+
+Internet Explorer
+
+Ipswitch
+
+Iridium
+
+JaSFTP
+
+KeePass
+
+KiTTY
+
+K-Meleon
+
+LinasFTP
+
+Lunascape
+
+Maple
+
+Maple Studio ChromePlus
+
+MikroTik Winbox
+
+Mozilla Flock
+
+Mozilla SeaMonkey
+
+mSecure
+
+Mustang Browser
+
+NCH ClassicFTP
+
+NCH Fling
+
+NetDrive
+
+NETGATE BlackHawk
+
+NetSarang XFTP
+
+NexusFile
+
+Nichrome
+
+NoteFly
+
+Notezilla
+
+NovaFTP
+
+NppFTP
+
+Odin Secure FTP Expert
+
+Opera
+
+Opera Mail
+
+Opera Next
+
+Orbitum
+
+Outlook
+
+oZone3D MyFTP
+
+Pale Moon
+
+Pidgin
+
+Pocomail
+
+Postbox
+
+PuTTY
+
+QtWeb
+
+QupZilla
+
+RealVNC
+
+RoboForm
+
+Rockmelt
+
+Safari
+
+SecureFX
+
+SftpNetDrive
+
+sherrod FTP
+
+Sleipnir
+
+SmartFTP
+
+Spark
+
+Staff-FTP
+
+Steed
+
+stickies
+
+StickyNotes
+
+Superbird
+
+SuperPutty
+
+Syncovery
+
+Titan
+
+To-Do DeskList
+
+Torch
+
+TrojitÃ¡
+
+TrulyMail
+
+UltraFXP
+
+Vivaldi
+
+Waterfox
+
+WinChips
+
+WinFtp Client
+
+WinSCP
+
+WS_FTP
+
+Yandex Browser
+
+yMail
+
+
+
+
+
+Network Activity
+
+The payload initiates a communication with the C&C server to exfiltrate the stolen data and receive commands. Besides the stolen data, it sends the Windows product name and version, username, computer name, and domain name to the C&C server.
+
+Lokibot is most commonly seen to send a POST request to <DOMAIN>/subdir/subdir1/../fre[.]php, although other less-common patterns have also been observed in the wild (e.g. <DOMAIN>/subdir/subdir1/cat[.]php).
+
+User-Agent: Mozilla/4.08 (Charon; Inferno)
+
+
+
+
+
+Analysis on file: 55589f10cbf2e9efa809a09c9d75bd8ff6aacd16

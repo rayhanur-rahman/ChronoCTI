@@ -1,0 +1,231 @@
+The MacKeeper team continually monitors current threats to be sure that our customers are secure. Since 2015, macOS Bundlore has been a noticeable phenomenon in the macOS security landscape. It is known for using different techniques to bypass macOS security measures.
+
+Before we start If your Mac doesn’t recognize a USB, the actual problem may be poor overall performance. Just optimize your Mac regularly to avoid many of these cases in the future. and let it do all the dirty work for you! Track app updates, manage login items and control your Mac’s memory—all in one app.
+
+In this article, we provide insights on macOS Bundlore’s main components, the way they work and how Bundlore can be detected and deleted.
+
+What is macOS Bundlore?
+
+Why is macOS Bundlore on the rise in 2019?
+
+How does macOS Bundlore get installed on users’ computers?
+
+macOS Bundlore command-and-control communication
+
+macOS Bundlore privilege escalation, defense evasion, and persistence
+
+macOS Bundlore advertisement delivery
+
+How does macOS Bundlore overcome macOS 10.14 protection mechanisms?
+
+What does the infrastructure look like?
+
+How do you delete macOS Bundlore and its components?
+
+What is macOS Bundlore?
+
+macOS Bundlore (a.k.a. OSX.Bundlore) is a form of adware—a type of malware that displays unwanted advertisements on infected computers and installs software products offered by affiliates. Its specific feature is that adware applications are installed in a “bundle,” in other words, together with the applications that the user initially wanted to install.
+
+macOS Bundlore applications provide intrusive pop-up ads, which may redirect to malicious websites or prompt a user to submit personal information. Such applications may also collect user-system information, such as IP addresses, queries entered into the search engines, URLs visited, pages viewed, passwords, and so on. The adware also reduces browser performance.
+
+The authors of macOS Bundlore try to keep up with Apple’s new security features. For example, on macOS versions prior to 10.13, macOS Bundlore installed a malicious browser extension that hijacked user search. Now, on macOS versions 10.13 and 10.14, custom user profiles are used for this purpose, because the previous approach is now blocked by macOS security features.
+
+Why is macOS Bundlore on the rise in 2019?
+
+Throughout any given year, MacKeeper’s Anti-Malware Lab collects and analyzes malware samples. During the last year, there was an unusually large amount of macOS Bundlore samples compared to other analyzed malware. In fact, macOS Bundlore is among the top 3 malware families detected by MacKeeper on users’ Macs from December 2018 to January 2019.
+
+The reasons for this proliferation include the following:
+
+macOS Bundlore is spread through digital advertisement, and ad distributors do not check whether the advertised service is malicious macOS Bundlore applications are constantly rebranded and updated to overcome macOS security updates, including System Integrity Protection The components of these applications are numerous and hard to delete
+
+How does macOS Bundlore get installed on users’ computers?
+
+macOS Bundlore actively uses advertisement of free software or updates to spread. Often, a fake Flash Player update is used. In general, when the software is downloaded from unofficial sources (torrents, pop-up ads, software download websites), the risk of getting malware like macOS Bundlore is high.
+
+Example of a macOS Bundlore dropper download page.
+
+Below is a general outline of how macOS Bundlore’s installer works.
+
+At first, a bash script called Install.sh downloads an archive with an application called mm-install-macOS from a remote server otcct.beforeoctavia.site, then extracts its content to a temporary directory and executes it.
+
+At the next stage, it contacts a command-and-control server service.macinstallerinfo.com to download installation scripts. Additionally, it reports every step of the installation process to another server, events.ponystudent.win.
+
+To be able to interact with the system, macOS Bundlore needs the user’s password, so it spawns a misleading window that pretends to be from macOS and collects the entered password.
+
+To verify if a password is valid, macOS Bundlore uses the following command:
+
+/bin/sh -c echo $’password’ | sudo -S echo __tbt_true 2>&1
+
+From this point, macOS Bundlore is able to perform any actions with pseudo-privileges without an additional permission from the user.
+
+macOS Bundlore downloads multiple scripts from a remote server during installation. One of them is called InstallSoftware and is responsible for installing software offered by affiliates. In this case, it is MediaDownloader. Another one is called InstallOffers. The main purpose of InstallOffers is to install additional components of macOS Bundlore.
+
+Here is a general macOS Bundlore execution flow diagram:
+
+Still, macOS Bundlore has some functional differences on different macOS versions.
+
+macOS Bundlore consists of three main components:
+
+An updater (MyMacUpdater) is responsible for communicating with the command-and-control server to get the latest version of macOS Bundlore WebTools bypasses macOS security measures, changes browser behavior, achieves persistence, and installs an ad delivery component An ad delivery application (MyCouponsmart) injects malicious JavaScript code with AppleScript into a browser
+
+Below is a detailed analysis of all macOS Bundlore components and their behavior that we observed on macOS 10.12.
+
+macOS Bundlore command-and-control communication
+
+As we mentioned earlier, macOS Bundlore installs an updater, in our case it was called MyMacUpdater. The main purpose of the updater is to get updates from service.ezsoftwareupdater.com and install them. The updater has its own LaunchAgent, and it checks for updates every 12 hours. Here is updater’s check_update method. If a new version is found, it downloads it and then executes the downloaded file.
+
+macOS Bundlore privilege escalation, defense evasion, and persistence
+
+WebTools, a component of Bundlore, is a Mach-O file that invokes an in-built system function to decrypt the following execution stage and send it as input to /bin/bash for execution.
+
+At the next stage, multiple actions are performed. WebTools checks whether any of its brands are already installed. Brands are different names for the ad delivery component. In fact, all brands are the same binary file.
+
+Then WebTools downloads and installs the ad delivery component—an application that injects malicious JavaScript code with AppleScript into a browser. In our test, it is called MyCouponsmart. WebTools installs it to the Applications folder then achieves persistence with LaunchAgent or LaunchDaemon depending on the permission it has. WebTools makes a backup for the ad delivery component under the user’s Application Support directory with a dot in front of the application name, so it is hidden.
+
+After the installation, WebTools gets information about macOS and Safari versions. If a macOS version is 10.12 or older and a Safari version is 10 or older, it modifies the TCC.db (Accessibility preferences database) to enable AppleScript access to applications like Terminal, Safari or Chrome so that it can interact with them.
+
+To be able to run JavaScript code in Safari, WebTools enables the developer menu and modifies authorizationdb.
+
+If Firefox is installed, WebTools deploys a malicious browser extension.
+
+In the end, WebTools runs a post-installation check to verify that an ad delivery component was installed, persistence was achieved, and it can run JavaScript in Safari and Chrome. Installation progress is reported to a remote server, events.blitzbarbara.win.
+
+macOS Bundlore advertisement delivery
+
+The ad delivery’s main executable is a bash script called stubLaunch, which decodes a Base64-encoded .enc file inside the ad delivery’s folder and runs it. A decoded binary creates a pipe and fork. In the parent process, it decrypts the payload, and writes it to the pipe while the child process reads data from the pipe, then sends it to a newly created Python process.
+
+A Python custom-encrypted code is written to a pipe payload. But it is trivial to decrypt it, because we have a decryption function.
+
+After decrypting, Base64 decoding, and bz2 decompressing, there is another obfuscated Python code including strings encrypted with the above-mentioned algorithm. We decrypted all strings and renamed all classes and functions. The most interesting thing about the final Python code is the following “if” statement.
+
+The “out of browser” key decides how macOS Bundlore will interact with a browser. If it is off, as a default value, it will run Evil_init.run() method. Run method checks if its files were removed and tries to restore them from a backup.
+
+Inject browser method tries to inject malicious JavaScript code into a browser with AppleScript and reports the status to events.mycouponsmartmac.com.
+
+But if the “out of browser” key is set to “on,” it will run Evil2_init.run() method. This run method retrieves RC4-encrypted AppleScript from auctioneer.50million.club and executes it.
+
+Decrypted AppleScript checks for running browsers, gets an offerId from a URL auctioneer.50million.club/server and runs the following code to spawn a new window with an advertisement.
+
+How does macOS Bundlore overcome macOS 10.14 protection mechanisms?
+
+The above-mentioned process was described for macOS version 10.12 and older. Since then, Apple has implemented multiple new security features. Starting from macOS version 10.12.2, they moved TCC.db under System Integrity Protection (SIP), ensuring that even with root access to your system, malware cannot change critical system files and settings. Moreover, in macOS 10.14 Apple included Mail, Messages, Safari, Home, iTunes data files, and Time Machine backup to files protected by SIP. Another new security feature is that Apple removed the possibility of downloading third-party extensions that aren't available in the Safari Extensions Gallery.
+
+Yet, macOS Bundlore has mechanisms to overcome these security mechanisms as well.
+
+In the most recent version, WebTools (a component of macOS Bundlore which bypasses macOS security measures, changes browser behavior, achieves persistence, and installs an ad delivery component) consists of one application instead of multiple binaries and bash scripts. Still, there is a possibility to analyze the latest version of WebTools without diving into assembler code, as in the end it sends clear text logs to a tracking server.
+
+WebTools creates multiple blocking windows, so a user won’t be able to stop the installation process or see what it executes.
+
+INFO Hidden window bounds: (1012.0, 527.0, 668.0, 530.0)", INFO Screen bounds: (0.0, 80.0, 1920.0, 977.0)", INFO anchor bounds: (1047.0, 761.0, 13.0, 13.0)", INFO Creating a blocker window at (0.0, 80.0, 1047.0, 977.0)", INFO Creating a blocker window at (1060.0, 80.0, 860.0, 977.0)", INFO Creating a blocker window at (0.0, 80.0, 1920.0, 681.0)", INFO Creating a blocker window at (0.0, 774.0, 1920.0, 283.0)", INFO closing the preferences pane",
+
+In the previous versions, WebTools modified TCC.db to be able to control other applications with AppleScript. But now TCC.db is under SIP, which means the user can’t access it even with administrator permissions until SIP is turned off.
+
+WebTools uses interesting techniques to bypass SIP. First, it creates a pair of keys with the ssh-keygen utility. Then WebTools moves a newly-created key to user’s authorized_keys and enables remote login. This means, WebTools can use these keys to access the machine without a password.
+
+Enabling local SSH, /usr/bin/sudo -u johndoe /usr/bin/ssh-keygen -f '/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//tmpMMkey1552298281' -q -N '', /usr/bin/sudo -u johndoe /bin/mkdir -p '/Users/johndoe/.ssh', /usr/bin/sudo -u johndoe /usr/bin/touch '/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//authorized_keys', /bin/cat '/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//tmpMMkey1552298281.pub' >> '/Users/johndoe/.ssh/authorized_keys', /usr/sbin/systemsetup -getremotelogin, /usr/sbin/systemsetup -setremotelogin on, /usr/sbin/systemsetup -getremotelogin,
+
+Next, it uses the sftp utility to login to a local ssh service with a newly-created pair of keys. From this point, WebTools can access and modify files protected by SIP.
+
+getLocalFile: filename=/Users/johndoe/Library/Application Support/com.apple.TCC/TCC.db , targetDir=/private/tmp/.mminstallwt_11-03-2019_02-58-01.643/ Executing shell command:/usr/bin/sudo -u johndoe sftp -o NoHostAuthenticationForLocalhost=yes -i '/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//tmpMMkey1552298281' localhost putLocalFile: filename=/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//TCC.db , targetDir=/Users/johndoe/Library/Application Support/com.apple.TCC Executing shell command:/usr/bin/sudo -u johndoe sftp -o NoHostAuthenticationForLocalhost=yes -i '/private/tmp/.mminstallwt_11-03-2019_02-58-01.643//tmpMMkey1552298281' localhost
+
+WebTools uses the same technique to modify com.apple.Safari.Extensions.plist preferences and apply changes using the profiles utility. It uses the same utility to change Chrome behavior.
+
+Another file WebTools modifies is com.apple.Safari.plist, where it changes browser behavior such as home page and new tab opening functionality. It also allows JavaScript execution from AppleScript. Next, WebTools installs an ad delivery component and archives persistence.
+
+What does the infrastructure look like?
+
+It is interesting why domains related to this adware are still active. Usually, domains spreading malware are blocked within a month. Still, the domain service.macinstallerinfo.com has remained active since 2015. From that time until now, it has used Rackspace cloud service located in the US. Of course, the email of the domain registrant is hidden by an anonymization service, domainsbyproxy. A possible reason is that there may not have been any complaints regarding this domain.
+
+Another interesting fact is that all domains related to this adware have subdomain events where all tracking information is sent by adware installers, and all of them point to one IP address, which is also located on the same hosting service. This shows a connection for all components of macOS Bundlore.
+
+How do you delete macOS Bundlore and its components?
+
+To protect yourself, be sure to install the latest macOS updates and download all applications from legitimate sources, such as official vendor websites.
+
+If your system is infected with macOS Bundlore or you suspect it may be, make sure you use a reliable anti-malware solution to remove adware from Mac.
+
+AWe’ve ensured that MacKeeper removes macOS Bundlore components, excluding any SIP-protected files—due to the nature of such protection. They include Safari’s preferences files, which can be removed manually.
+
+For further research on macOS Bundlore, you can use the following list of Indicators of compromise.
+
+IOC
+
+$HOME/Applications/MyMacUpdater
+
+$HOME/Library/LaunchAgents/com.MyMacUpdater.agent.plist
+
+$HOME/Library/Application Support/.MMUpdater/MMUpdater
+
+/Applications/MyCouponsmart
+
+/$HOME/Library/Application Support/.MyCouponsmart
+
+$HOME/Library/LaunchAgents/com.MyCouponsmart.agent.plist
+
+/Library/LaunchDaemons/com.MyCouponsmart.agent.plist
+
+/Applications/MyShopcoupon
+
+$HOME/Library/Application Support/.MyShopcoupon/MyShopcoupon
+
+$HOME/Library/LaunchAgents/com.MyShopcoupon.agent.plist
+
+Firefox addon path:
+
+~/Library/Application Support/Firefox/Profiles/[profile name]/extensions/.*@MyCouponize.com.xpi
+
+List of all connected brands:
+
+flashmall webshoppers webshoppy smartshoppy shoptool shoppytool coolshopper easyshopper liveshoppers smart-shoppy easy-shopper bestwebshoppers hotshoppy bestsmartshoppers myshopmate myshopbot surfmate surfbuyer couponizer shoppinizer shopperify mycouponize myshopcoupon
+
+You’ll need to check Applications, Application Support, and LaunchAgents folders against these brands as well as currently running processes.
+
+Modified plists:
+
+~/Library/Containers/com.apple.Safari/Data/Library/Preferences/com.apple.Safari.Extensions.plist
+
+~/Library/Containers/com.apple.Safari/Data/Library/Preferences/com.apple.Safari.plist
+
+~/Library/Preferences/com.apple.Safari.SandboxBroker.plist
+
+~/Library/Safari/Bookmarks.plist
+
+~/Library/Safari/Extensions/Extensions.plist
+
+~/Library/Preferences/com.google.Chrome.plist
+
+IPs:
+
+161.47.20.33
+
+Domains:
+
+auctioneer.50million.club
+
+cdn.macmymacupdater.com
+
+cdn.mycouponsmartmac.com
+
+cdn.myshopcouponmac.com
+
+events.blitzbarbara.win
+
+events.macinstallerinfo.com
+
+events.mycouponsmartmac.com
+
+events.ponystudent.com"
+
+otcct.beforeoctavia.site
+
+secure.mycouponsmartmac.com
+
+service.ezsoftwareupdater.com
+
+service.macinstallerinfo.com
+
+software.macsoftwareserver05.com
+
+
+
+If you’ve detected some suspicious activity on your computer, you can really help us with further research by sending us malware samples and other relevant information.

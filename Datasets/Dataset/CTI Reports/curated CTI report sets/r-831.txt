@@ -1,0 +1,53 @@
+Tricks and COMfoolery: How Ursnif Evades Detection
+
+Ursnif is one of the main threats that is effectively evading detection right now (at publication)
+
+The dropper uses a COM technique to hide its process parentage
+
+WMI is used to bypass a Windows Defender attack surface reduction rule
+
+Fast evolution of delivery servers means detection tools are left in the dark
+
+In February we saw a resurgence of Ursnif (also known as Gozi), a credential-stealing Trojan that was first uncovered in 2007 and has been active ever since. Alongside Emotet, this threat is one of the most pervasive and effective malware families currently being delivered through malicious spam campaigns.
+
+The recent campaign we observed used a standard multi-stage malware delivery mechanism, consisting of a phishing email delivering a Microsoft Word dropper containing a VBA AutoOpen macro inside a password-protected zip file. When opened, the document downloads the Ursnif executable from a remote server using PowerShell WebClient.DownloadFile, WebClient.DownloadString or WebClient.DownloadData methods. Unlike many run-of-the-mill malicious spam campaigns, what’s interesting is how Ursnif’s operators link different techniques together to effectively socially engineer targets, evade perimeter detection and bypass one of Windows Defender’s attack surface reduction rules.
+
+Effective Social Engineering
+
+Ursnif’s operators commonly tailor the phishing lure used against targets to make the email appear more authentic. In this campaign, this was done by basing attachment names and the message body on businesses in the same or related industries, or those that are geographically close to the target. In one of the samples we analysed, the target was a manufacturer of a niche product. The zip attachment was named after a similar manufacturer in the same industry and the Word dropper containing the malicious macro was named ‘Request4.doc’, presumably to trick the target into thinking that it was a legitimate purchase order.
+
+In addition to targeted lures, Ursnif campaigns often rely on exploiting the existing trust relationship between a compromised email account and the target. Instead of an unsolicited message, the target is commonly sent a phishing email from a compromised email account as a reply to an existing conversation between the sender and the target. The curiosity of receiving an unexpected attachment from a sender that is already known to the target might just be enough to entice a user into opening the attachment.
+
+Attack Infrastructure
+
+Ursnif has a fast-changing delivery and command and control (C2) infrastructure. Our research found that the average time from the registration of a domain used to host Ursnif executables to when a user first runs the corresponding Word dropper is less than 12 hours. The speed at which Ursnif’s operators can change its infrastructure gives web proxies and other perimeter security controls that rely on a traditional detection-based techniques little time to block the download of the malware. In one example, only one domain reputation service had classified the Ursnif delivery domain as malicious at the time when the Word dropper was run.
+
+Encrypted Zip Attachment
+
+The dropper is delivered inside a password-protected zip file, with the password in the email message body. The delivery of malware using this method is an old but effective technique for bypassing perimeter detection by malware scanners at the target’s email gateway. While some organisations will block inbound email containing password-protected zip files as a matter of policy, many will not do so because they are often used for legitimate reasons.
+
+Bypassing an Attack Surface Reduction Rule
+
+The dropper we identified in this campaign contains an obfuscated VBA AutoOpen macro, which runs each time the document is opened. The document uses the common trick of requesting the user to enable macros, if they are not already enabled.
+
+The macro runs a Base64 encoded PowerShell command using the Win32_Process and Win32_ProcessStartup WMI classes. The resulting PowerShell instance is run as a child process of WmiPrvSe.exe (WMI Provider Host). This benefits the adversary by defeating detection techniques that rely on parent-child process relationships because the parent process ID of the Ursnif executable will be the process ID of WmiPrvSe.exe, instead of winword.exe. In our testing on Windows 10 Enterprise 1809, we found that this technique is effective at bypassing the Windows Defender attack surface reduction rule that blocks Office applications from creating child processes. In some of the samples, this was used in conjunction with a COM technique that also spoofed the parent process ID of the Ursnif process.
+
+It is worth noting, however, that if the attack surface reduction rule ‘Block process creations originating from PSExec and WMI commands’ is enabled, the attack is successfully blocked.
+
+We identified two types of PowerShell commands in this campaign. The first type downloads the Ursnif executable to the target’s user profile folder, checks that the resulting file is greater than or equal to 40 KB, then runs it using the Invoke-Item cmdlet.
+
+COMfoolery – Spoofing Ursnif’s Parent Process ID
+
+The second type similarly downloads a string from a remote server and runs it in memory using the ‘iex’ alias of the Invoke-Expression cmdlet. Additionally, it downloads a byte array from a second website and writes it to a file in the target’s ProgramData folder. It then instantiates a ShellBrowserWindow COM object by reference to its class ID (C08AFD90-F2A1-11D1-8455-00A0C91F3880), which is finally used to run the Ursnif executable using the ShellExecute method. The malware is run in a hidden window because the value of the final parameter is set to zero.
+
+The reason for doing this is so that Ursnif is created as a child process of the current instance of explorer.exe. This adds another layer of difficulty for detection techniques that rely on parent-child process relationships because the parent process ID of the Ursnif executable will be the process ID of explorer.exe, instead of the more suspicious WmiPrvSe.exe.
+
+Mitigation
+
+Endpoints that are running Bromium Secure Platform are protected from this threat because each user task, such as opening an Office document, is run in its own isolated micro-virtual machine (called μVMs). When the user closes a μVM, the virtual machine is destroyed along with the malware. All of the threat data associated with the attack is recorded and presented in the Bromium Controller, enabling SOC and incident response teams to quickly gain detailed insights into the threats facing their organisations. For machines that support Windows Defender’s Attack Surface Reduction (ASR) rules (Windows 10 version 1803 or later, Windows Server 2016 1804 or later, or Windows Server 2019), we recommend enabling the rule to block process creations originating from PSExec and WMI commands (D1E49AAC-8F56-4280-B9BA-993A6D77406C), which would block the PowerShell stage of this attack.
+
+Update 04/06/2019 – Reader Maxim Guslyaev reported to us that ASR rule D1E49AAC-8F56-4280-B9BA-993A6D77406C was not being enforced on Windows 10 version 1709. We conducted additional testing and confirmed that the minimum OS version to enforce this rule is Windows 10 version 1803. To verify that ASR rules are working correctly, we recommend testing your configuration using Microsoft’s test files. As of 4 June, there is an open issue on Microsoft’s Github page to clarify the minimum OS version required for each ASR rule. Thank you, Maxim!
+
+Indicators of Compromise (IOCs)
+
+The following IOCs were collected as part of this blog.

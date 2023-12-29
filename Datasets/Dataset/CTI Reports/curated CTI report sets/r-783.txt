@@ -1,0 +1,133 @@
+It connects to certain websites to send and receive information. It deletes the initially executed copy of itself.
+
+It uses the Windows Task Scheduler to add a scheduled task that executes the copies it drops.
+
+This spyware arrives on a system as a file dropped by other malware or as a file downloaded unknowingly by users when visiting malicious sites. It may be dropped by other malware.
+
+Infection Channel: Downloaded from the Internet, Dropped by other malware
+
+File Size: 325,641 bytes File Type: EXE Memory Resident: Yes Initial Samples Received Date: 20 Oct 2016 Payload: Connects to URLs/IPs
+
+Arrival Details
+
+This spyware arrives on a system as a file dropped by other malware or as a file downloaded unknowingly by users when visiting malicious sites.
+
+It may be dropped by the following malware:
+
+TROJ_UPATRE.YYSTV
+
+Installation
+
+This spyware drops the following copies of itself into the affected system and executes them:
+
+%Application Data%\{malware file name}.exe
+
+(Note: %Application Data% is the Application Data folder, where it usually is C:\Documents and Settings\{user name}\Application Data on Windows 2000, Windows Server 2003, and Windows XP (32- and 64-bit); C:\Users\{user name}\AppData\Roaming on Windows Vista (32- and 64-bit), Windows 7 (32- and 64-bit), Windows 8 (32- and 64-bit), Windows 8.1 (32- and 64-bit), Windows Server 2008, and Windows Server 2012.)
+
+It drops the following files:
+
+%Application Data%\client_id
+
+%Application Data%\group_tag
+
+(Note: %Application Data% is the Application Data folder, where it usually is C:\Documents and Settings\{user name}\Application Data on Windows 2000, Windows Server 2003, and Windows XP (32- and 64-bit); C:\Users\{user name}\AppData\Roaming on Windows Vista (32- and 64-bit), Windows 7 (32- and 64-bit), Windows 8 (32- and 64-bit), Windows 8.1 (32- and 64-bit), Windows Server 2008, and Windows Server 2012.)
+
+It uses the Windows Task Scheduler to add a scheduled task that executes the copies it drops.
+
+It adds the following processes:
+
+svchost.exe
+
+It creates the following folders:
+
+%Application Data%\Modules\
+
+%Application Data%\Modules\injectDll32_configs
+
+(Note: %Application Data% is the Application Data folder, where it usually is C:\Documents and Settings\{user name}\Application Data on Windows 2000, Windows Server 2003, and Windows XP (32- and 64-bit); C:\Users\{user name}\AppData\Roaming on Windows Vista (32- and 64-bit), Windows 7 (32- and 64-bit), Windows 8 (32- and 64-bit), Windows 8.1 (32- and 64-bit), Windows Server 2008, and Windows Server 2012.)
+
+It adds the following mutexes to ensure that only one of its copies runs at any one time:
+
+Global\TrickBot
+
+It injects codes into the following process(es):
+
+added svchost.exe
+
+Autostart Technique
+
+The scheduled task executes the malware every:
+
+minute
+
+Download Routine
+
+This spyware saves the files it downloads using the following names:
+
+%Application Data%\Modules\injectDll32
+
+%Application Data%\Modules\systeminfo32
+
+%Application Data%\Modules\config.conf (updated config file)
+
+%Application Data%\Modules\injectDll32_configs\dinj
+
+%Application Data%\Modules\injectDll32_configs\dpost
+
+%Application Data%\Modules\injectDll32_configs\sinj
+
+(Note: %Application Data% is the Application Data folder, where it usually is C:\Documents and Settings\{user name}\Application Data on Windows 2000, Windows Server 2003, and Windows XP (32- and 64-bit); C:\Users\{user name}\AppData\Roaming on Windows Vista (32- and 64-bit), Windows 7 (32- and 64-bit), Windows 8 (32- and 64-bit), Windows 8.1 (32- and 64-bit), Windows Server 2008, and Windows Server 2012.)
+
+Information Theft
+
+This spyware s configuration file contains the following information:
+
+CnC
+
+Modules
+
+targeted banks (downloaded config file)
+
+Other Details
+
+This spyware connects to the following URL(s) to get the affected system's IP address:
+
+{BLOCKED}rnalip.com
+
+It connects to the following website to send and receive information:
+
+{BLOCKED}.{BLOCKED}.138.194:443
+
+{BLOCKED}.{BLOCKED}.44.28:443
+
+{BLOCKED}.{BLOCKED}.23.98:443
+
+{BLOCKED}.{BLOCKED}.28.24:443
+
+{BLOCKED}.{BLOCKED}.176.6:443
+
+{BLOCKED}.{BLOCKED}.209.51:443
+
+{BLOCKED}.{BLOCKED}.52.75:443
+
+{BLOCKED}.{BLOCKED}.211.34:443
+
+{BLOCKED}.{BLOCKED}.28.0:443
+
+{BLOCKED}.{BLOCKED}.234.69:443
+
+{BLOCKED}.{BLOCKED}.251.0:443
+
+{BLOCKED}.{BLOCKED}.28.103/response.php
+
+{BLOCKED}.{BLOCKED}.28.77:443
+
+http://{BLOCKED}.{BLOCKED}.1.53:8082
+
+It does the following:
+
+It monitors bank related site accesses in browsers using the following strings: */onlineserv/CM* *ibanking.stgeorge.com.au/ibank/loginPage.action* *ib.nab.com.au/nabib/index.jsp* *banking.westpac.com.au/wbc/banking/handler* *anz.com/IBAU/BANKAWAYTRAN* *anz.com/INETBANK/login.asp* *cibconline.cibc.com/olbtxn/authentication/*.cibc*
+
+
+
+It deletes the initially executed copy of itself

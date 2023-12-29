@@ -1,0 +1,247 @@
+It executes commands from a remote malicious user, effectively compromising the affected system.
+
+This backdoor arrives on a system as a file dropped by other malware or as a file downloaded unknowingly by users when visiting malicious sites.
+
+Infection Channel: Downloaded from the Internet, Dropped by other malware
+
+File Size: 198,581 bytes File Type: , EXE Memory Resident: Yes Initial Samples Received Date: 05 Oct 2012 Payload: Steals information, Compromises system security
+
+Arrival Details
+
+This backdoor arrives on a system as a file dropped by other malware or as a file downloaded unknowingly by users when visiting malicious sites.
+
+Installation
+
+This backdoor drops the following copies of itself into the affected system:
+
+%User Profile%
+
+ah_{4 random characters}.exe
+
+(Note: %User Profile% is the current user's profile folder, which is usually C:\Documents and Settings\{user name} on Windows 2000, XP, and Server 2003, or C:\Users\{user name} on Windows Vista and 7.)
+
+It adds the following mutexes to ensure that only one of its copies runs at any one time:
+
+xmas_mutex
+
+Autostart Technique
+
+This backdoor adds the following registry entries to enable its automatic execution at every system startup:
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion\Run
+
+nah_Shell = "%User Profile%
+
+ah_{4 random characters}.exe"
+
+Other System Modifications
+
+This backdoor adds the following registry entries as part of its installation routine:
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_reserv = "{BLOCKED}13.106 "
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_forms = "/system/prinimalka.py/forms"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_options = "/system/prinimalka.py/options"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_command = "/system/prinimalka.py/command"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_file = "/system/prinimalka.py/cookies"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_ss = "/cgi-bin/trash.py"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_pstorage = "/cgi-bin/trash.py"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_certs = "/cgi-bin/trash.py"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion
+
+nah_opt_idproject = "000055"
+
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\
+
+Windows\CurrentVersion"
+
+nah_opt_pauseopt = "1200"
+
+Backdoor Routine
+
+This backdoor executes the following commands from a remote malicious user:
+
+Archive and upload file(s)
+
+Capture screenshot
+
+Clear cookies
+
+Download and Execute other files
+
+List running process
+
+Reboot the affected system
+
+Steal certificates and cookies
+
+Update/Download a configuration file
+
+Upload a log file which contains stolen information
+
+It connects to the following URL(s) to send and receive commands from a remote malicious user:
+
+http://{BLOCKED}3.2/system/prinimalka.py/command
+
+Stolen Information
+
+This backdoor sends the gathered information via HTTP POST to the following URL:
+
+http://{BLOCKED}3.2/system/prinimalka.py/forms
+
+NOTES:
+
+
+
+It checks the existence of the following registry key:
+
+
+
+HKEY_CURRENT_USER\Software\Classes\FirefoxHTML\shell\open\command
+
+If it exists, it gets the folder location of firefox.exe and creates the following file:
+
+
+
+{folder location}\chrome\amba.jar
+
+Oncethe file mentioned above is executed, it drops the following file:
+
+
+
+{folder location}\chrome\amba.js - detected as JS_URSNIF.DJ
+
+It also modifies the following file to point to amba.jar:
+
+
+
+{folder path}\chrome\browser.manifest
+
+It injects itself into all running processes to remain memory-resident except for the following processes:
+
+
+
+svchost.exe
+
+[System Process]
+
+System
+
+smss.exe
+
+winlogon.exe
+
+lsass.exe
+
+avp
+
+csrss.exe
+
+services.exe
+
+It hooks the following API calls to hide its behavior on the affected system:
+
+
+
+CreateProcessA
+
+CreateProcessW
+
+FindFirstFileA
+
+FindNextFileA
+
+FindFirstFileW
+
+FindNextFileW
+
+RegEnumValueA
+
+RegEnumValueW
+
+It hooks the following API calls to search for network traffic for a predetermined HTML elements:
+
+
+
+InternetCloseHandle
+
+InternetQueryDataAvailable
+
+InternetReadFile
+
+InternetReadFileExA
+
+HttpSendRequestA
+
+HttpSendRequestW
+
+HttpOpenRequestW
+
+HttpOpenRequestAl
+
+It attempts to steal sensitive online banking information, such as user names and passwords from the following financial institutions:
+
+
+
+trade
+
+schwab
+
+fidelity
+
+paypal
+
+wamu bank
+
+wellsfargo
+
+suntrust
+
+usaa
+
+wachovia
+
+It does this by injecting certain HTML codes to the site.

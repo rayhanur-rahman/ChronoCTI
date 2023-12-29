@@ -1,0 +1,7 @@
+No concern about being discovered
+
+Kwampirs uses a fairly aggressive means to propagate itself once inside a victim's network by copying itself over network shares. While this method is considered somewhat old, it may still be viable for environments that run older operating systems such as Windows XP. This method has likely proved effective within the healthcare industry, which may run legacy systems on older platforms designed for the medical community. Older systems like Windows XP are much more likely to be prevalent within this industry.
+
+Additionally, once infected, the malware cycles through a large list of command and control (C&C) servers embedded within the malware. It appears while the list is extensive, not all of the C&Cs are active and continue to beacon until a successful connection is established. Despite modifying a small part of itself while copying itself across the network as a means to evade detection, the operators have made no effort to change the C&C communication protocol since its first inception.
+
+Both of these methods are considered particularly “noisy” and may indicate that Orangeworm is not overly concerned with being discovered. The fact that little has changed with the internals of Kwampirs since its first discovery may also indicate that previous mitigation methods against the malware have been unsuccessful, and that the attackers have been able to reach their intended targets despite defenders being aware of their presence within their network.

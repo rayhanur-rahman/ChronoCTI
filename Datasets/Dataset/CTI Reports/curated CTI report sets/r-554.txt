@@ -1,0 +1,129 @@
+Chaos: a Stolen Backdoor Rising Again
+
+This post describes a backdoor that spawns a fully encrypted and integrity checked reverse shell that was found in our SSH honeypot, and that was presented at GoSec 2017 in Montreal. We named the backdoor ‘Chaos’, following the name the attacker gave it on the system. After more research, we found out this backdoor was originally part of the ‘sebd’ rootkit that was active around 2013.
+
+Unable to find any documentation about the technical details of this backdoor, we decided to create some!
+
+Context
+
+This summer, one of our projects was to find malware for FreeBSD or, at least, evaluate if such a thing even exists. For this, we made use of the FreeBSD jails, which can be described as “chroot on steroids”. Our idea was to emulate an intranet structure using jails only, which is feasible since jails can be assigned their own IP-addresses on the host machine. Then, an attacker would breach a jail that is exposed to the Internet and, from there, pivot through the other jails. Unfortunately, no one ever got that far, as the typical attacker would leave immediately upon realizing they breached a FreeBSD system. Scripted bots uploaded their payload anyway, but the Linux ELF files cannot be run without a Linux emulation which made them useless. At this point, we can say that FreeBSD is a very good way to minimize your attack surface, simply because no attacker wants to deal with FreeBSD. Of course this advice is invalid if you are being targeted.
+
+As we gave up trying to find BSD malware, we decided to look for Linux malware instead. Within minutes of operation, we were getting some. Then, something different than the plethora of Gafgyt (LizardSquad) and Mirai knocked on our door.
+
+First Contact and Recon
+
+On June 21st, 2017 an attacker breached one of our monitored systems by brute-forcing SSH credentials using two IPs known to be part of the TOR network:
+
+89.234.157.254 and 192.42.116.16.
+
+As usual, the attacker first disabled the logging history and then checked the SSHD binary as well as the existence of certain files, such as the /usr/include/gpm2.h. The purpose of this was to make sure that the breached machine has not already been infected by someone else. The files that the attacker checked are commonly known to be used by patched SSHDs to log stolen SSH credentials. Afterwards, the attacker finalized the infection by downloading and installing the payload.
+
+Installing Chaos
+
+For stage two, the attacker downloaded a file that pretended to be a jpg from http://xxx.xxx.xxx.29/cs/default2.jpg. In fact, the file was a .tar archive and the .jpg extension was to make it look more legitimate in possible log files or packet captures. The tar archive contained:
+
+Chaos (ELF executable) Client (ELF executable) initrunlevels (Shell script) install (Shell script)
+
+“Chaos”, in the tar archive, is the actual backdoor that is installed on the victim’s system and the “Client” file is the client to connect to the installed backdoor. Further details on the two ELF files are discussed below, but let’s first look at the two shell scripts initrunlevels and install. The install script is copying the initrunlevels script to /etc/init.d to make sure that the file is executed at each boot of the system.
+
+As shown above, the initrunlevels script opens port 8338 and checks if certain files exist. If they do not exist, the script copies inconspicuous files to the paths which it checked. Next, the script copies the Client into /usr/include/cli.h and Chaos into /usr/include/stabd.h and /usr/sbin/smdb. This is done in order to create backups for both Client and Chaos on the system. The attacker also dropped and executed additional files to make the system part of an IRC botnet, but within the scope of this post we investigated the backdoor only.
+
+Reverse Shell
+
+As covered above, the attacker dropped two files: Chaos and Client. Chaos is the backdoor that enables the reverse-shell and Client is needed to initiate the connect-back from chaos.
+
+The backdoor works as follows: first Chaos opens a raw TCP socket which checks if incoming packets contain a specific incoming string. As this is a raw socket, any incoming packet to an open port will be read and checked. If Chaos identifies the string, it connects back to the client listening on TCP port 8338. After connecting back to the Client, the Client and Chaos exchange key material from which they derive two AES keys. They proceed by checking if the key negotiation was successful with a challenge-response authentication, as shown below.
+
+It was interesting to see that both parties have the same two keys, which are used for sending and receiving. The encrypted password turned out to be hardcoded which we managed to crack and get the password in plain text. The password seems to be reused across different infections.
+
+The backdoor makes firewall evasion possible. Indeed, any decent firewall would block incoming packets to any ports that have not explicitly been opened for operational purposes. However, with Chaos using a raw socket, the backdoor can be triggered on ports running an existing legitimate service. As an example, a Webserver that would only expose SSH (22), HTTP (80) and HTTPS (443) would not be reachable via a traditional backdoor due to the fact that those services are in use, but with Chaos it becomes possible.
+
+Furthermore, a raw socket is not visible via netstat , unless the -w flag is explicitly specified.
+
+Key Derivation
+
+After the Client has established a connection from Chaos, it sends a 40 bytes long string to Chaos. This string works as a pre-shared key and is created as follows:
+
+As shown, pre-shared key consists of two blocks, one for each of the two keys that are generated. The keys are derived from the blocks as follows:
+
+Note that the keys are used for AES in CBC mode with a key length of 128 bits which means that part of the SHA1 sum is thrown away. To ensure the integrity of the encrypted packet, two more hashes are generated. They are later used for an HMAC.
+
+In IDA, we can clearly see the AES encryption in CBC mode:
+
+Note that they don’t make the common mistake of re-using the IV. The key derivation process works the same way for the Chaos binary except that the blocks are swapped.
+
+Packet Structure
+
+The structure of each exchanged packet is as follows:
+
+As we can see, the first two bytes determine the length of the payload. The size fields and the actual payload are encrypted. To mark the end of the payload, three subsequent null-bytes are used. Following the delimiter, a sequence field is used to count and keep the packets in order. The last field is an HMAC to ensure packet integrity.
+
+Integrity of Packets
+
+Each communication packet is not only encrypted but also checked for integrity using an HMAC. The HMAC is created as follows:
+
+The inner value is a hash over Constant1, concatenated with the size fields, the encrypted payload, the delimiter and sequence number. The outer hash is created over Constant2 and the inner hash.
+
+Stolen Backdoor Revival
+
+As mentioned earlier, this backdoor first appeared in 2013 as part of the ‘sebd’ rootkit. We found a post on hackforums.net, where a user claims to know how the backdoor was made publicly available. The source code of the backdoor is said to have been caught by another honeypot and the “researcher” was unethical enough to release the source code on this forum to make it available for script kiddies.
+
+Our attackers simply changed the name of the backdoor to make people think it is a new creation whereas it was actually stolen.
+
+Victims
+
+To assess the number of infections, we performed an Internet-wide scan using the handshake extracted from the client. The number of compromised systems turned out to be quite low, below the 150 mark. Below is a geographic distribution of the victims.
+
+We contacted CCIRC with the list of compromised systems’ IP addresses and they proceeded to notify their CERTs partners and victims.
+
+Conclusion
+
+The Chaos backdoor is pretty interesting as it uses a stealthy raw socket to spawn a reverse-shell with full network encryption and integrity checks. However, the backdoor’s encryption can easily be broken if the pre-shared key is known, as it is transmitted in clear text.
+
+An interesting takeaway from this is: since the attackers open port 8338 for incoming packets, it is also obvious that the operators want to use the client binary on the infected machine. They would use the infected machine as a proxy to conduct further criminal actions. This enables them to potentially cross network boundaries in the process.
+
+Even though the backdoor is a few years old already, no antivirus detects this backdoor according to Virustotal.
+
+In the next blog post, we will describe the other malware that made the system part of an IRC Botnet.
+
+Thanks to Olivier Bilodeau who contributed to the analysis and this blog post.
+
+This blog post has been written by Sebastian Feldmann who has done an internship with us before finishing his master’s thesis. Sebastian has demonstrated extraordinary abilities and we are proud to offer him the opportunity to share his research with the world.
+
+Indicators of Compromise
+
+For the latest IoC information about this threat please see our malware-ioc github repository.
+
+File hashes
+
+Chaos : 0a27b0579702888c3399c6b853acf986beae2a4e
+
+: 0a27b0579702888c3399c6b853acf986beae2a4e Client: 7f5d3bb5079f9bf077832301615fa6e2e072c4e8
+
+File system
+
+WARNING: The filesystem artifacts documented below are also legitimate system files. You need to investigate a little bit before jumping to conclusions.
+
+This group installs the backdoor in /usr/sbin/smdb and a puts a backup of it in /usr/include/stabd.h.
+
+/usr/sbin/smdb when legitimate is part of the Samba suite. Installed for Windows compatibility like file-sharing or Active Directory integration.
+
+/usr/include/stabd.h when legitimate is part of the glibc header files. It is a plain text file. When malicious it is a binary file.
+
+You can inspect the files manually or run our Yara rule against them with:
+
+yara sedb_chaos.yar /usr/sbin/smdb yara sedb_chaos.yar /usr/include/stabd.h
+
+/etc/init.d/runlevels when malicious is a script that will open ports on the firewall and execute the backdoor. It’s the malware’s persistence mechanism.
+
+System investigation
+
+Listening raw sockets are a very rare thing on normal Linux servers. You can inspect your system by running the below command as root:
+
+netstat -lwp
+
+This will list the processes which have listening raw sockets open. You can then investigate processes to assess if it is legitimate or not. If you (or your system administrator) doesn’t know what it is, it is likely not legitimate since listening raw sockets are rare.
+
+If you are infected
+
+Because chaos doesn’t come alone but with at least one IRC Bot that has remote code execution capabilities, we advise infected hosts to be fully reinstalled from a trusted backup with a fresh set of credentials.

@@ -1,0 +1,115 @@
+June 5, 2020 UPDATE
+
+Blog update following the release of the testimony by Shawn Henry, CSO and President of CrowdStrike Services, before the House Intelligence Committee that was recently declassified.
+
+What was CrowdStrike’s role in investigating the hack of the DNC?
+
+CrowdStrike was contacted on April 30, 2016 to respond to a suspected breach. We began our work with the DNC on May 1, 2016, collecting intelligence and analyzing the breach. After conducting this analysis and identifying the adversaries on the network, on June 10, 2016 we initiated a coordinated remediation event to ensure the intruders were removed and could not regain access. That remediation process lasted approximately 2-3 days and was completed on June 13, 2016.
+
+Why did the DNC contact CrowdStrike?
+
+The DNC contacted CrowdStrike to respond to a suspected cyber attack impacting its network. The DNC was first alerted to the hack by the FBI in September 2015. According to testimony by DNC IT contractor Yared Tamene Wolde-Yohannes, the FBI attributed the breach to the Russian Government in September 2015 (page 7).
+
+Why did the DNC hire CrowdStrike instead of just working with the FBI to investigate the hack?
+
+The FBI doesn’t perform incident response or network remediation services when organizations need to get back to business after a breach.
+
+CrowdStrike is a leader in protecting customers around the world from cyber threats. It is common for organizations to hire third-party industry experts, like CrowdStrike, to investigate and remediate cyber attacks when they suspect a breach even if they are collaborating with law enforcement. As John Carlin, former Assistant Attorney General for the National Security Division at The Department of Justice, testified before the House Intelligence Committee (cited from page 21 of his testimony):
+
+“A lot of — outside of any political organization, companies, most corporations, they often would use these third party contractors, who they hired through their own counsel, and maximize the control from the point of view of the victim.”
+
+Did CrowdStrike have proof that Russia hacked the DNC?
+
+Yes, and this is also supported by the U.S. Intelligence community and independent Congressional reports.
+
+Following a comprehensive investigation that CrowdStrike detailed publicly, the company concluded in May 2016 that two separate Russian intelligence-affiliated adversaries breached the DNC network.
+
+To reference, CrowdStrike’s account of their DNC investigation, published on June 14, 2016, “CrowdStrike Services Inc., our Incident Response group, was called by the Democratic National Committee (DNC), the formal governing body for the US Democratic Party, to respond to a suspected breach. We deployed our IR team and technology and immediately identified two sophisticated adversaries on the network – COZY BEAR and FANCY BEAR…. At DNC, COZY BEAR intrusion has been identified going back to summer of 2015, while FANCY BEAR separately breached the network in April 2016.”
+
+This conclusion has most recently been supported by the Senate Intelligence Committee in April 2020 issuing a report [intelligence.senate.gov] validating the previous conclusions of the Intelligence community, published on January 6, 2017, that Russia was behind the DNC data breach.
+
+The Senate report states on page 48:
+
+“The Committee found that specific intelligence as well as open source assessments support the assessment that President Putin approved and directed aspects of this influence campaign.”
+
+Furthermore, in his testimony in front of the House Intelligence Committee, Shawn Henry stated the following with regards to CrowdStrike’s degree of confidence that the intrusion activity can be attributed to Russia, cited from page 24:
+
+HENRY: We said that we had a high degree of confidence it was the Russian Government. And our analysts that looked at it and that had looked at these types of attacks before, many different types of attacks similar to this in different environments, certain tools that were used, certain methods by which they were moving in the environment,and looking at the types of data that was being targeted, that it was consistent with a nation-state adversary and associated with Russian intelligence.
+
+Have any other organizations concluded that Russia was behind the DNC hack?
+
+Yes. CrowdStrike’s conclusion that Russia was behind the DNC hack is supported by the U.S. Intelligence community and also by independent Congressional reports. Most recently, the Senate Intelligence Committee released a report in April 2020 that validated the previous conclusions of the Intelligence Community Assessment, published on January 6, 2017, all concluding that Russia was behind the DNC data breach.
+
+Page 157 of the Senate report states that the Select Committee on Intelligence “conducted an extensive examination of the intelligence demonstrating Russia’s intrusions into DNC networks.“ Senator Richard Burr (R – North Carolina), who served as Chairman of the Senate Intelligence Committee at the time the report was issued, confirmed this finding: “The Committee found no reason to dispute the Intelligence Community’s conclusions.”
+
+The Intelligence Community Assessment, published on January 6, 2017 also confirms that Russia was behind the DNC hack, stating on page 2 of the report: “In July 2015, Russian intelligence gained access to Democratic National Committee (DNC) networks and maintained that access until at least June 2016. This unclassified ODNI report was based on extensive classified intelligence collected by the CIA, NSA, and FBI; the ODNI determined the classified intelligence should not be released in order to protect the sensitive sources and methods by which it was collected.
+
+It’s also worth noting that other security companies, including Fidelis and FireEye have supported CrowdStrike’s analysis.
+
+Does CrowdStrike have evidence that data was exfiltrated from the DNC network?
+
+Yes. Shawn Henry stated in his testimony to the House Intelligence Committee that CrowdStrike had indicators of exfiltration (page 32) and that data had clearly left the network. Also, on page 2, the Intelligence Community Assessment also confirmed that the Russian intelligence agency GRU “had exfiltrated large volumes of data from the DNC.”
+
+Did CrowdStrike see in real-time the adversaries exfiltrate data and emails from the DNC network?
+
+No and that’s typical for incident response cases. In the vast majority of cyber investigations, incident responders don’t witness exfiltration in real-time. In fact, often we are called in after theft has taken place. We collect forensics, evidence of prior activity on the network, map where the adversary has gained access and prepare remediation plans.
+
+In this particular case, CrowdStrike saw circumstantial evidence of data exfiltration from the DNC network. As a reference point circumstantial evidence is the type of evidence such as DNA analysis or fingerprints that are fully admissible in courts.
+
+Shawn Henry stated in his testimony that CrowdStrike had indicators of exfiltration (page 32 of the testimony):
+
+“Counsel just reminded me that, as it relates to the DNC’ we have indicators that data was exfiltrated. We did not have concrete evidence that data was exfiltrated from the DNC, but we have indicators that it was exfiltrated.’
+
+and circumstantial evidence that data was taken as he states on page 75 ”so there is circumstantial evidence that it was taken” and page 76:
+
+“MR. HENRY: So, to go back, because I think it’s important to characterize this. We didn’t have a network sensor in place that saw data leave’ We said that the data Ieft based on the circumstantial evidence. That was a conclusion that we made. when I answered that question, I was trying to be as factually accurate’ I want to provide the facts. so I said that we didn’t have direct evidence’ But we made a conclusion that the data left the network.”
+
+On page 32 of the testimony, Henry also explains that
+
+“We don’t have video of it happening, but there are indicators that it happened” and “we did not have concrete evidence that data was exfiltrated from the DNC, but we have indicators that it was exfiltrated.” As another reference point, the independent report by Special Counsel Robert S. Mueller also cites the theft of documents from the DNC and DCCC on page 40, stating the following:
+
+“Officers from Unit 26165 stole thousands of documents from the DCCC and DNC networks, including significant amounts of data pertaining to the 2016 U.S. federal elections. Stolen documents included internal strategy documents, fundraising data, opposition research, and emails from the work inboxes of DNC employees.”
+
+Is it true that part of the exfiltration happened after CrowdStrike was already engaged by the DNC?
+
+This question about the specific timeline of the exfiltration is addressed directly by Shawn Henry in his testimony on page 26.
+
+“MR. HENRY: So the analysis started the first day or two in May, and then that was about 4 to 6 weeks. I think, on June 10th, we started what we call the remediation event. so we collected enough intelligence. We identified where the adversaries were in the environment’ We came up with a remediation plan to say we see them in multiple locations. This – these are the actions that we need to execute in order to put a new infrastructure in place and to ensure that the adversaries don’t have access to the new infrastructure. So that would have been June 10th when we started. And we did the remediation event over a couple of days.”
+
+Of note, it is a standard practice in incident response to first coordinate a remediation event to prevent the adversary from doing further damage and following that to fully restore network functionality. We followed industry best practices to accomplish the fastest remediation path for our customer.
+
+On page 27 of Shawn Henry’s testimony, he further explains CrowdStrike’s role as incident responders:
+
+“To be clear, our goal, my goal was to protect the client. We were hired to protect the client. We identified an adversary there. The goal was to make sure that the adversary was removed and the client had a clean environment with which to work.”
+
+Did any DNC endpoints protected by your technology get breached in subsequent attacks?
+
+There is no indication of subsequent breaches taking place on any DNC machine protected by CrowdStrike Falcon®.
+
+Do you have a comment about the allegation that Russia stole Democratic Party emails from John Podesta and then passed them to WikiLeaks?
+
+CrowdStrike was not involved in investigating John Podesta’s email leaks. Henry says on page 62 of this testimony, he “has no relationship with them [the Podesta emails].”
+
+What is the timeline of the DNC hack?
+
+According to public records, this is the timeline of the DNC hack that CrowdStrike was hired to investigate. :
+
+January 22, 2020 UPDATE
+
+CrowdStrike is non-partisan – we routinely work with both Republican and Democratic organizations to protect them from cyber-attacks – along with thousands of other organizations around the world of all industries and sizes.
+
+Here are a few key facts about CrowdStrike:
+
+We were founded in California and are headquartered in the heart of Silicon Valley in Sunnyvale, California. We are one of the fastest growing global companies in cybersecurity today.
+
+and are headquartered in the heart of Silicon Valley in Sunnyvale, California. We are one of the fastest growing global companies in cybersecurity today. Our founders have no connections to Ukraine . Suggestions to the contrary are completely false.
+
+. Suggestions to the contrary are completely false. We have never had physical possession of the DNC servers . We conducted our investigation using a process called “imaging” — an established practice in cyber investigations that involves making a copy of the hard drives and memory. This is standard procedure for cyber investigations.
+
+. We conducted our investigation using a process called “imaging” — an established practice in cyber investigations that involves making a copy of the hard drives and memory. This is standard procedure for cyber investigations. We worked closely with law enforcement and provided all forensic evidence and analysis to the FBI as requested.
+
+We are proud of our work and will remain focused on our mission of protecting our customers around the world from dangerous cyber threats.We are grateful that the media has debunked false claims about our work for the Democratic National Committee (DNC) in 2016:
+
+September 25, 2019 Update:
+
+With regards to our investigation of the DNC hack in 2016, we provided all forensic evidence and analysis to the FBI. As we’ve stated before, we stand by our findings and conclusions that have been fully supported by the US Intelligence community.
