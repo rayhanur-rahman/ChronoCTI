@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+spacy = "*"
+spacy-transformers = "*"
+# cupy = "*"
+torch = "*"
+spacy-llm = "*"
+openpyxl = "*"
+skorch = "*"
+transformers = "*"
+scikit-llm = "*"
+accelerate = "*"
+sentencepiece = "*"
+jsonlines = "*"
+openapi = "*"
+tqdm = "*"
+scikit-learn = "*"
+
+[dev-packages]
+autopep8 = "*"
+
+[requires]
+python_version = "*"

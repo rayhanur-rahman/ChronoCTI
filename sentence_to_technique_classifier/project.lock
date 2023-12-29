@@ -1,0 +1,65 @@
+convert:
+  cmd: python -m spacy run convert
+  script:
+    - python scripts/convert.py en assets/bootstrap_samples/training-99.jsonl corpus/train.spacy
+    - python scripts/convert.py en assets/bootstrap_samples/eval-99.jsonl corpus/dev.spacy
+  deps:
+    - path: assets/bootstrap_samples/training-99.jsonl
+      md5: d4d5d69951044ee085dc7ec5c606ede5
+    - path: assets/bootstrap_samples/eval-99.jsonl
+      md5: 7ea64af53bcffd1eed2c16fce8c2c6ba
+    - path: scripts/convert.py
+      md5: 35ee9ecddb27d1dbf74d9bc36fb44d0b
+  outs:
+    - path: corpus/train.spacy
+      md5: aa92708710ffaad73d9fac3e0b526092
+    - path: corpus/dev.spacy
+      md5: ed08b105ad012133d2a777aefea4b644
+  spacy_version: 3.5.3
+  spacy_git_version: '512241e12'
+train:
+  cmd: python -m spacy run train
+  script:
+    - python -m spacy train configs/config-w2v.cfg --output bagging_models/w2v/bm99
+      --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --nlp.lang en
+      --gpu-id 0
+  deps:
+    - path: configs/config-w2v.cfg
+      md5: 78d386ed95716f161454a7612930fb3b
+    - path: corpus/train.spacy
+      md5: aa92708710ffaad73d9fac3e0b526092
+    - path: corpus/dev.spacy
+      md5: ed08b105ad012133d2a777aefea4b644
+  outs:
+    - path: bagging_models/w2v/bm99/model-best
+      md5: f0880e6725488ed8fa991dfe83f79888
+  spacy_version: 3.5.3
+  spacy_git_version: '512241e12'
+evaluate:
+  cmd: python -m spacy run evaluate
+  script:
+    - python -m spacy evaluate bagging_models/w2v/bm99/model-best corpus/dev.spacy
+      --output bagging_models/w2v/bm99/metrics.json
+  deps:
+    - path: corpus/dev.spacy
+      md5: ed08b105ad012133d2a777aefea4b644
+    - path: bagging_models/w2v/bm99/model-best
+      md5: f0880e6725488ed8fa991dfe83f79888
+  outs:
+    - path: bagging_models/w2v/bm99/metrics.json
+      md5: 783fbb41046187df63b948a73b46a47a
+  spacy_version: 3.5.3
+  spacy_git_version: '512241e12'
+package:
+  cmd: python -m spacy run package
+  script:
+    - python -m spacy package bagging_models/w2v/bm99/model-best packages --name textcat_multilabel_demo
+      --version 0.0.0 --force
+  deps:
+    - path: bagging_models/w2v/bm99/model-best
+      md5: f0880e6725488ed8fa991dfe83f79888
+  outs:
+    - path: packages/en_textcat_multilabel_demo-0.0.0/dist/en_textcat_multilabel_demo-0.0.0.tar.gz
+      md5: 936ea8b8b963cf2436410216a5e84112
+  spacy_version: 3.5.3
+  spacy_git_version: '512241e12'
