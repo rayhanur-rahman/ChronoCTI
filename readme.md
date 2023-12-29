@@ -1,3 +1,6 @@
+# ChronoCTI
+ChronoCTI is an NLP+ML pipeline for identifying temporal patterns of cyberattack TTPs. This repository primarily contains the source code for building the pipeline. This repository does not contain the intermediate outputs, and the final model takes approximately 250GB of disk space. Please contact the owner by creating an issue if you want access. 
+
 # steps for building ChronoCTI
 - install `pipenv`
 - run `pipenv install`
