@@ -1,0 +1,73 @@
+Defenses of any sort, virtual or physical, are a means of forcing your attacker to attack you on your terms, not theirs. As we build more elaborate defenses within information security, we force our attacker’s hand. For instance, in many cases, implementing multi-factor authentication systems just forces the attacker to go after that system directly to achieve their goals. Take the breach at RSA, for example. It has been attributed to attackers who needed the SecurID information to go after their real targets in the defense industry.
+
+As we discussed, this malware has been used to launch targeted attacks via “spear phishing” campaigns against targets mainly in the US, since around 2007. According to our research, these attacks originate from servers in China with what appears to be the purpose of obtaining information from the defense sector: the same sector that makes extensive use of PC/SC x509 Smartcards for authentication.
+
+Smartcards have a long history of usage in the Defense Sector, for both physical and information access management, and historically have merely forced attackers to route around the smartcard authentication system through other, more vulnerable attack vectors.
+
+It should come as no surprise, then, that we recently discovered a variant of Sykipot with some new, interesting features that allow it to effectively hijack DOD and Windows smart cards. This variant, which appears to have been compiled in March 2011, has been seen in dozens of attack samples from the past year.
+
+Like we have shown with previous Sykipot attacks, the attackers use a spear phishing campaign to get their targets to open a PDF attachment which then deposits the Sykipot malware onto their machine (the attackers here took advantage of a zero-day exploit in Adobe). Then, unlike previous strains, the malware uses a keylogger to steal PINs for the cards. When a card is inserted into the reader, the malware then acts as the authenticated user and can access sensitive information. The malware is controlled by the attackers from the command & control center.
+
+Here is more detail on the attack:
+
+Smartcard access
+
+The ﬁrst one is that it creates a new thread with a keylogger routine. The code is very basic, it stores the window name and the keys pressed under a ﬁle named MSF5F0.dat on an unencrypted format, example:
+
+Title:Internet Explorer
+
+www.google.es
+
+Title:My Computer
+
+It uses the WIN32 APIʼs functions [GetKeyState, GetAsyncKeyState,
+
+GetForegroundWindow, GetWindowTextA].
+
+It also saves the information contained in the clipboard using the native functions:
+
+OpenClipboard, GetClipboardDataand CloseClipboard.
+
+This code is very similar to other pieces of APTʼs like:
+
+http://contagiodump.blogspot.com/2010/07/apt-activity-monitor-keylogger.html
+
+Apart from this we found two more modules that attracted our attention. The ﬁrst one is capable of listing all the certificates that are stored on the windows key store:
+
+This next routine is called if the command “cl” is present on the conﬁg ﬁle fetched from the C&C.
+
+When you insert a smart card into a reader attached to a Windows computer, the certiﬁcate on the smart card is registered to the local certiﬁcate store on the client computer.
+
+The second one is even more interesting:
+
+It loads:
+
+C:Program FilesActivIdentityActivClientcpkcs201.dll
+
+(a module that handles some of the functions related with ActivIdentityʼs ActivClient solution.)
+
+ActivClient is a smart card-based PKI authentication solution for compliance with:
+
+U.S. Government Smart Card Interoperability Specifications GSC-IS 2.1
+
+U.S. General Services Administration (GSA) Basic Services Interface (BSI)
+
+(In fact it is one of the platforms used to support the Department of Defense common access card - DoD CAC)
+
+This routine is called if the command “cm” is present on the conﬁg ﬁle fetched from the C&C:
+
+So, the modus operandi of the attackers is listing the certificates present on the victimʼs
+
+computer included the smartcards, stealing the PIN using the keylogger module and then
+
+use this information to log onto remote resources protected with certificates/smartcards.
+
+To log onto protected resources they have implemented the command “krundll”, if the C&C sends that command, the victim receives a new dll that implements the required code to login using the certiﬁcate and the stolen PIN. This DLL implements the “LoginFunc” and “GetFunc”. These methods will contain all the code depending on the application used:
+
+Summary
+
+We have seen how the attackers are implementing different techniques to bypass two-factor authentication with smartcard/PIN to access protected resources on the victimʼs network. By capturing the PIN for the smartcard and binding the certificate, malware can silently use the card to authenticate to secure resources, so long as the card remains physically present in the card reader. This is similar to what Mandiant described on the 2011 M-Trends report as a “Smart Card Proxy”. While trojans that have targeted smartcards are not new, there is obvious siginficance to the targeting of a particular smartcard system in wide deployment by the US DoD and other government agencies, particularly given the nature of the information the attackers seem to be targeting for exfiltration.
+
+Implications
+
+As defenses get better, attackers will continue to change their tactics to adapt, and as seen here, will hijack the very systems designed to provide more security, if necessary. An interesting by-product of this malware’s necessity of having the card physically present is that attackers can only leverage it for secure authentication to target systems, during times that the user them is physically present at the workstation, making unauthorized activity that much more difficult to discern from legitimate usage. Although smart cards are designed to provide a two factor system of ‘chip and pin’, again we see that true two-factor authentication is not possible without a physical component that is not accessible digitally.

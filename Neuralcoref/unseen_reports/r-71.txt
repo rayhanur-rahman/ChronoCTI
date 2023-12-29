@@ -1,0 +1,125 @@
+Conti is a relatively new player in the ransomware field. Since first emerging in May 2020, the ransomware operators (aka. the Conti Gang) claim more than 150 successful attacks, which equates to millions of dollars in extortion fees.
+
+Like other ransomware syndicates that have emerged recently, the Conti gang follows the growing trend of double extortion: they steal sensitive files and information from their victims and later use it to extort their victims by threatening to publish the data unless the ransom is paid.
+
+Key Details
+
+Emerging Threat: In a short amount of time, Conti ransomware has caused a great deal of damage and made headlines across the world.
+
+High Severity: The Cybereason Nocturnus Team assesses the threat level as HIGH given the destructive potential of the attacks
+
+Low-and-Slow: Prior to the deployment of the ransomware, the attackers attempt to infiltrate and move laterally throughout the organization, carrying out a fully-fledged hacking operation, or RansomOp.
+
+Rapid Development Cycle: In just a few months, the Conti gang has released 3 new versions of the ransomware, improving the malware in each version.
+
+The Successor of Ryuk: The Conti Gang collaborated with the TrickBot Gang, which are now using Conti as their ransomware of choice.
+
+Spreading across the network: Conti is not satisfied with causing damage to just the infected machines. Instead, it spreads in the network via SMB and encrypts files on remote machines as well.
+
+Detected and Prevented: The Cybereason Defense Platform fully detects and prevents the Conti ransomware.
+
+Similar to ransomware such as Egregor (“Egregor News”) and Maze (“Maze News”), the Conti Gang has their own website, “Conti News,” which stores a list of their victims, and it is where they publish the stolen data:
+
+Conti News website
+
+Conti is a very destructive threat. Besides the double extortion that puts information and reputation at risk, the Conti operators equip it with a spreading capability, which means that Conti not only encrypts the files on the infected host but also spreads via SMB and encrypts files on different hosts, potentially compromising the entire network. The rapid encryption routine takes just a few seconds to minutes due to its use of multithreading, which also makes it very difficult to stop once the encryption routine starts.
+
+Another major factor that contributes to the popularity of Conti is the collaboration with the TrickBot Gang. Conti is sold as a Ransomware-as-a-Service in underground forums to exclusive buyers and partners such as the TrickBot gang, which replaced Ryuk and adopted Conti as their new ransomware of choice.
+
+In addition to the sophisticated capabilities and the collaboration with the TrickBot gang, the increased number of Conti attacks against big companies such as Advantech, which was extorted for $13.8M, and other attacks against big North American based companies as listed in this article, contributed to Conti making its way into the news this year. With a rapid development cycle that keeps the malware up-to-date and equipped with advanced capabilities, along with the promotion done by the TrickBot gang, it is no wonder why Conti is referred to as the successor of Ryuk.
+
+Breaking Down the Attack
+
+From Bazar Backdoor to Ransomware
+
+The TrickBot Gang was known to use their infamous TrickBot malware to start interactive hacking operations and deploying secondary payloads such as Ryuk and Anchor. Earlier this year, the group shifted to using the Bazar backdoor to launch an interactive attack and deploy Ryuk, and since July 2020 their new ransomware of favor has been Conti.
+
+Although the payloads and tools of the TrickBot Gang have changed over time, the initial infection vector for the Bazar loader and backdoor has remained the same: a phishing email containing a link to Google Drive which stores the payload:
+
+Conti attack diagram - from Bazar to ransomware
+
+Rapid Development Cycle
+
+Since Conti was first discovered in July 2020, three different versions have been observed. With each new version, the Conti Gang added more capabilities which make the ransomware more dangerous and destructive. The following table summarizes the main changes between the three versions:
+
+Version 1 Version 2 Version 3 Earliest to oldest creation times (Based on VT) 2020-05-29
+
+2020-08-18 2020-10-09
+
+2020-10-21 2020-11-06 2020-12-07 Ransom Note file name Conti_readme.txt
+
+CONTI.txt R3adm3.txt
+
+readme.txt readme.txt Extension .CONTI Changes per sample Changes per sample Mutex _CONTI_ lslaif8aisuuugnzxbvmdjk Kjkbmusop9iqkamvcrewuyy777 ojkxjfsu81209088812 Embedded emails / URLs flapalinta1950@protonmail.com xersami@protonmail.com
+
+Ksarepont@protonmail.com cokeremie@protonmail.com
+
+hawhunrocu1982@protonmail.com consfronepun1983@protonmail.com
+
+viegesobou1977@protonmail.com hardsandspikab1971@protonmail.com
+
+stargoacompte1970@protonmail.com muddkarhersmo1973@protonmail.com versmohubfast1972@protonmail.com ceslingvafi1973@protonmail.com Andrea.Davis.1989@protonmail.com forrestdane79@protonmail.com http://m232fdxbfmbrcehbrj5iayknxnggf6niqfj6x4iedrgtab4qupzjlaid[.]onion https://contirecovery[.]info http://m232fdxbfmbrcehbrj5iayknxnggf6niqfj6x4iedrgtab4qupzjlaid[.]onion https://contirecovery[.]info
+
+https://contirecovery[.]best
+
+heibeaufranin1971@protonmail.com
+
+polzarutu1982@protonmail.com niggchiphoter1974@protonmail.com Form An independent executable An independent executable Loader + DLL An independent executable Loader + DLL Spreading via SMB Spreading via SMB if instructed by command line arguments. Spreading via SMB even without command line arguments. Spreading via SMB even without command line arguments. Unique Not using a website, just an email Observed the use of icons: PDB:
+
+A:\source\conti_v3\Release\cryptor.pdb
+
+Observed the use of icons: Ransom Note
+
+Conti Ransomware Execution
+
+This section focuses on version 2 and version 3. As mentioned in the table above, version 3 has two forms - one is an independent executable, and the other is a loader that loads a DLL from the resources section and executes it. Even before doing any static / dynamic analysis, we can use VirusTotal to determine that the resources section probably contains more data, in this case an encrypted DLL that is loaded into memory:
+
+Screenshot of VirusTotal file’s section information
+
+The APIs for interacting with the resources are dynamically resolved using GetProcAddress:
+
+Dynamically resolved API used to interact with the resources
+
+The loader then decrypts the payload using an hardcoded key, and loads it into memory:
+
+Decryption key of the Conti payload
+
+Once the DLL is loaded, Conti starts it’s encryption and spreading routines. The ransomware scans the network for SMB (port 445). If it finds any shared folders it can access, it will try to encrypt the files on the remote machines as well:
+
+Wireshark pcap of Conti spreading via SMB
+
+Conti uses a multithreading technique to fast encrypt all the files. This routine takes seconds to just a few minutes depending on the number of files on the machine. Each sample has a unique extension that the malware adds to the encrypted files. While using Cybereason with prevention mode off to allow investigation of the ransomware execution, it is possible to see the encryption activity and the creation of new files:
+
+File Events feature in the Cybereason Defense Platform shows the encryption of the files
+
+After the files are encrypted, the malware leaves the ransom note in every folder, making sure it is noticeable to the victim. The Conti Gang usually sets a deadline for the victim to pay the ransom, and if the deadline passes without payment, they leak the victim data on their website “Conti News.”
+
+Cybereason Detection and Prevention
+
+The Cybereason Defense Platform is able to prevent the execution of Conti Ransomware using multi-layer protection that detects and blocks malware with threat intelligence, machine learning, and next-gen (NGAV) capabilities. Additionally, when the Anti-Ransomware feature is enabled, behavioral detection techniques in the platform are able to detect and prevent any attempt to encrypt files and generates a MalopTM for it:
+
+Ransomware Malop triggered due to the malicious activity
+
+Using the Anti-Malware feature with the right configurations (listed in the recommendations below), The Cybereason Defense Platform will also detect and prevent the execution of the ransomware and ensure that it cannot encrypt targeted files. The prevention is based on machine learning, which prevents both known and unknown hashes:
+
+Anti-Malware alert - preventing Conti ransomware
+
+User notification, blocking the execution of the ransomware in the endpoint
+
+Security Recommendations
+
+• Enable the Anti-Ransomware Feature on Cybereason NGAV: Set Cybereason Anti-Ransomware protection mode to Prevent - more information for customers can be found here
+
+• Enable Anti-Malware Feature on Cybereason NGAV: Set Cybereason Anti-Malware mode to Prevent and set the detection mode to Moderate and above - more information can be found here
+
+• Keep Systems Fully Patched: Make sure your systems are patched in order to mitigate vulnerabilities
+
+• Regularly Backup Files to a Remote Server: Restoring your files from a backup is the fastest way to regain access to your data
+
+• Use Security Solutions: Protect your environment using organizational firewalls, proxies, web filtering, and mail filtering
+
+• Indicator's of Compromise: Includes C2 Domains, IP addresses, Docx files SHA-1 hashes, and Msi files. Open the chatbot on the lower right-hand side of this blog to download your copy.
+
+MITRE ATT&CK TECHNIQUES
+
+Lior Rochberger

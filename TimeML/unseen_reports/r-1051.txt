@@ -1,0 +1,17 @@
+Emotet’s method of self-propagation—brute forcing passwords—has additional potential to cause major headaches for organizations as it may result in multiple failed login attempts, which can lead to users becoming locked out of their network accounts. This has the knock-on effect of increased calls to IT helpdesks and general loss of productivity. This was a hallmark of the notorious Conficker (W32.Downadup) threat and, 10 years later, threats continue to cause similar problems.
+
+As well as brute forcing passwords, Emotet can also spread to additional computers using a spam module that it installs on infected victim machines. This module generates emails that use standard social engineering techniques and typically contain subject lines including words such as “Invoice”. Some subject lines include the name of the person whose email account has been compromised, to make it seem less like a spam email. The emails typically contain a malicious link or attachment which if launched will result in them becoming infected with Trojan.Emotet.
+
+Most recently, Mealybug appears to have expanded its operations to primarily become a distributor of threats for other attack groups.
+
+Emotet becomes a global threat
+
+When Mealybug was first identified in 2014 it was using Emotet to spread banking Trojans, and was focused on targeting banking customers in Germany. At the time, Mealybug was using Trojan.Emotet as the loader portion of W32.Cridex.B, a rewritten version of the Cridex banking Trojan. In 2015, Mealybug started targeting Swiss banking customers as well and evolved Emotet into more modular malware. The new version of Emotet had separate modules for its loader, banking data theft, email login theft, distributed denial of service (DDoS) attacks, and malicious spam.
+
+Mealybug has primarily been engaged in using Emotet for the delivery of banking Trojans, and in 2017 it was the first group to deliver the IcedID (Trojan.IcedID) banking Trojan. However, also in 2017, it was observed delivering the Trojan.Trickybot and Ransom.UmbreCrypt ransomware. Mealybug has developed its capabilities over the years and now appears to offer an “end-to-end” service for delivery of threats. It delivers the threats, obfuscates them to reduce the chances of detection, and provides a spreader module that allows the threats to self-propagate.
+
+Emotet gets an initial foothold on a victim machine or network by sending an email containing either a malicious link that leads to a downloader document or that has a malicious document attached. Anti-analysis tactics have been present in Emotet since at least 2015 and, in 2018, Emotet’s payload consists of a packed file containing the main component and an anti-analysis module. The anti-analysis module performs multiple checks to ensure it is not being run on a malware research machine, then loads the main component. Either PowerShell or JavaScript is used to download the Trojan, which delivers a packed payload file to the victim machine. Once on a machine, the latest version of Emotet:
+
+Moves itself to its preferred directory Creates a LNK file pointing to itself in the start-up folder Collects victim machine information and sends it to the C&C server
+
+It can then download any new payloads from the C&C server, and execute them. Emotet can download an updated version of itself, or any other threat. Existing versions of Emotet download modules from the C&C server that include:

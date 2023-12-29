@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pandas = "*"
+openpyxl = "*"
+cython = ">=0.25"
+pytest = "*"
+tokenizers = "*"
+spacy = "*"
+spacy-transformers = "*"
+spacy-experimental = "*"
+torch = "*"
+en-coreference-web-trf = {file = "https://github.com/explosion/spacy-experimental/releases/download/v0.6.1/en_coreference_web_trf-3.4.0a2-py3-none-any.whl"}
+numpy = "*"
+scipy = "*"
+scikit-learn = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"

@@ -1,0 +1,144 @@
+Introduction
+
+Hacking groups linked to the Chinese state are not a new threat. In fact, for the last couple years they have tended to be the most active along with Russian state affiliated hacking groups. One of these groups is the ‘Emissary Panda’ group, also known as TG-3390, APT 27 and Bronze Union. This is a hacking group with Chinese origins which targets selected organisations related with education, energy and technology.
+
+In the past, Emissary Panda has used many ways to target their victims, with the most notable being the exploits from the Hacking Team leak. Usually, the delivered payload is either the well-known ‘PlugX’ or ‘HttpBrowser’ RAT, a tool which is believed to have Chinese origins and to be used only by certain Chinese hacking groups.
+
+Recent research showed that a new tool is in development from this group, which is still active, and is being found in recent compromised machines. The purpose of this blog post is to briefly describe this new tool we found which has possible ties with the same people who developed ‘HttpBrowser’.
+
+Attribution
+
+While attribution is always hard, we assessed that the Emissary Panda group is highly likely behind the development of this tool based on the following information:
+
+Several code similarities with previous samples (see examples in Figure 1 and 2).
+
+Tools were found on compromised machines which have been used in the past by this group. These tools are: ChinaChopper, a web shell which allows the attacker to execute commands on the victim’s machine. A password is required in order to interact with the web shell. In our case the password was: “123!@ZA”. The publicly available nbtscan and netview enumeration tools. A modified mimikatz which extracts passwords from memory. The Hunter tool, a web app scanning tool. Use of DLL Hijacking technique to execute the payload, a technique that they have used in the past.
+
+
+
+Figure 1: Old sample on the left side, our sample on the right side
+
+Figure 2: Old sample on the left side, our sample on the right side
+
+Figure 3: Old sample on the left side, our sample on the right side
+
+Technical overview
+
+Based on our research and investigation of the compromised machines, we were able to find two samples which seem to be in development and contain code from some old HttpBrowser samples. Both samples share a lot of code but one of them has more functionality.
+
+The execution starts when a malicious SFX file is executed. The following files are included in the executable:
+
+INISafeWebSSO.exe – Legitimate file which will load the malicious DLL
+
+inicore_v2.3.30.dll – Malicious DLL
+
+sys.bin.url – The name of both malicious payloads we found
+
+In order to execute the payload, the attackers take advantage of a technique called DLL Search Order Hijacking. Once the malicious DLL is loaded, it will decrypt a part of its own code using a XOR loop (see Figure 4), patch the entry point of the legitimate executable and jump again, back to the malicious DLL (see Figure 5).
+
+Figure 4: First XOR decryption loop
+
+Figure 5: Patched entry point
+
+After jumping back to the DLL, it will repeat the same process to decrypt a part of itself and find the addresses of LoadLibrary and GetProcAddress to load all the necessary functions dynamically.
+
+Lastly, it will read the sys.bin.url file and the execution will transfer to it. Once this is done, it will XOR decrypt the rest of the malicious payload and decompress it using RtlDecompressBuffer.
+
+Payload
+
+We will focus on the payload with the additional functionality (we will describe the differences between the two samples we found later). Entering the payload, we can see some interesting strings which seem to be used for debugging purposes (see Figure 6 and Figure 7). This is one of the reasons we believe that the tool is still in development.
+
+Figure 6: Debug strings
+
+Figure 7: Debug strings
+
+The action taken is based on the number of passed parameters. They are summarised in the following table and described below.
+
+Option 0 – Terminate/delete itself, WMI execution
+
+When the binary is executed for the first time:
+
+It will check if it runs from the %TEMP% folder, if it does, it will attempt to kill its own process.
+
+If it runs from the %APPDATA% folder it will spawn a new svchost process with -k as a parameter and it will inject the sys.bin.url to it.
+
+Otherwise, it will create a new directory with the name systemconfig under %APPDATA%, move all the three files (executable, DLL, sys.bin.url) into it, and will execute the binary from the created directory using WMI.
+
+Option one – Svchost injection
+
+Where the number of passed parameters is one, the payload will read the sys.bin.url file from %appdata%\systemconfig. It will then spawns a new svchost process as C:\windows\system32\svchost.exe –k update in suspended state and injects the payload. Finally, it patches the entry point of svchost.exe so it can execute the malicious payload after the ResumeThread call.
+
+Option two – Persistence svchost injection again
+
+The method of persistence depends on the access rights. If the payload’s process is running from a user with admin rights then it will create a new service. The service name will be taken from the config, in our case the name is systemconfig with ‘for system config’ as the description of the service. The binary path will be the extracted installer path along with /update as a parameter.
+
+Otherwise, it will add the binary’s path to the Software\Microsoft\Windows\CurrentVersion\Run key with —Update as a parameter. If the persistence was done by this method, or not at all, then it will inject into svchost as described in the option one section.
+
+Option three – Core functionality
+
+This is described in detail below in the Core Functionality section.
+
+Option four – UAC Bypass
+
+An already public UAC bypass method is included in the binary. It doesn’t matter if the method will work or not since the process will exit. This is one more indication that the tool is still in development and there are plans to expand its capabilities.
+
+Core functionality
+
+Currently, the core functionality includes writing the configuration to registry and communicating with the C C server. We did not find any malicious functionality such as uploading or downloading files, or executing attacker’s commands.
+
+Config
+
+Each value of the config is written to the registry after encrypting them using the DES algorithm. A new registry key is created under HKEY_CURRENT_USER\Software\Classes using either the SystemProductName value from the HARDWARE\DESCRIPTION\System\BIOS key or the hardcoded string “68A-D3H-B1111 as a name. Additionally, a hardcoded string -HjDWr6vsJqfYb89mxxxx is appended to the name. For example:
+
+VMware Virtual Service-HjDWr6vsJqfYb89mxxxx or
+
+Z68A-D3H-B1111-HjDWr6vsJqfYb89mxxxx
+
+The key and the IV used in the encryption are based on the first eight bytes of this registry key’s name, for example, VMware V.
+
+The encrypted sub-keys are described below. The majority of these sub-keys will not be read from the payload once they have been written. This might suggest that there are plans to expand the functionality of the tool. We wrote a Python script to automate the identification of the registry key and decryption of the sub-key values [1]. A summary of the decrypted values can be found in the following table:
+
+Key name Description Key value in sample one Key value in sample two Bin Payload file’s name sys.bin.url sys.bin.url Console N/A helen galway Dll Hijacked DLL used to run the payload inicore_v2.3.30.dll inicore_v2.3.30.dll Group N/A Default Default GUID Unique GUID generated using CoCreateGuid A unique GUID A unique GUID MD5 N/A HjDWr6vsJqfYb89mxxxx HjDWr6vsJqfYb89mxxxx OnlineHelp Stores the C C IP. 103.59.144.183:443, 159.65.80.157:443 Path Path for Associated Files C:\ProgramData\systemconfig\ C:\ProgramData\systemconfig\ PE Legitimate executable which will load the DLL file. INISafeWebSSO.exe INISafeWebSSO.exe Periodic N/A 0:1 0:1 Process Process to inject svchost.exe svchost.exe Serv Service name systemconfig systemconfig ServDis Service description for systemconfig for systemconfig
+
+Differences between the two samples
+
+As mentioned before, the two samples share a lot of code but there are many differences between them. Two important differences which should be highlighted are:
+
+Each sample has different debug strings. The sample with less functionality needs to read and decrypt the stored registry values in order to communicate with the C C or to inject to svchost. This is because the config is not included in the binary.
+
+A summary of the differences can be found below:
+
+Conclusion
+
+Emissary Panda is still active and continues to target selected organisations. Even though the discovered samples do not have any malicious functionality, we assess that they are still in development and will be used in future attacks.
+
+References
+
+[1] https://github.com/nccgroup/Cyber-Defence/tree/master/Scripts/emissary_panda_registry
+
+Previous work carried out:
+
+https://www.secureworks.com/research/threat-group-3390-targets-organizations-for-cyberespionage
+
+https://www.secureworks.com/research/bronze-union
+
+IOCs
+
+C C IP 103.59.144.183 159.65.80.157
+
+Registry value Description HjDWr6vsJqfYb89mxxxx Appended to a key name in SoftwareClasses Z68A-D3H-B1111 Prepended to a key name in SoftwareClasses C:ProgramData Directory with three identified files inside systemconfig Check for the presence of this key in: SoftwareMicrosoftWindowsCurrentVersionRun Systemconfig Check for this service with description: “for systemconfig”
+
+File Name SHA-256 INISafeWebSSO.exe C501203FF3335FBFC258B2729A72E82638719F60F7E6361FC1CA3C8560365A0E inicore_v2.3.30.dll 4D65D371A789AABE1BEADCC10B38DA1F998CD3EC87D4CC1CFBF0AF014B783822 sys.bin.url 2B2BB4C132D808572F180FE4DB3A0A3143A37FDECE667F8E78778EE1E9717606 sys.bin.url 3E718F39DFB2F6B8FBA366FEFA8B7C127DB1E6795F3CAAD2D4A9F3753EEA0ADC
+
+Published date: 18 May 2018
+
+Written by: Nikolaos Pantazopoulos and Thomas Henry
+
+Share this: Twitter
+
+Reddit
+
+LinkedIn
+
+Facebook
+

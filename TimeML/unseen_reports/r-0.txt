@@ -1,0 +1,231 @@
+Installation
+
+Threats in this family can be installed on your PC by exploit kits such as JS/Neclu, spam email attachments, or infected removable drives. They can also be downloaded by other malware such as Win32/Gamarue and Win32/Dorkbot.
+
+This malware can create a file on your PC using the name of any of the files it finds in %SystemRoot% and sets the attributes to read-only and hidden. For example, we have seen it use the following files names:
+
+explorer.exe
+
+bfsvc.exe
+
+fveupdate.exe
+
+helppane.exe
+
+hh.exe
+
+isuninst.exe
+
+notepad.exe
+
+regedit.exe
+
+slrundll.exe
+
+splwow64.exe
+
+svchost.exe
+
+taskman.exe
+
+twunk_16.exe
+
+twunk_32.exe
+
+winhelp.exe
+
+winhlp32.exe
+
+write.exe
+
+It then creates this file in the following location:
+
+Some variants use a random folder name instead of <PC name>. Some variants can also create a shortcut link to <startup folder> that points to its dropped copy.
+
+The malware creates the following registry entries so that it runs each time you start your PC:
+
+In subkey: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+
+Sets value: "%APPDATA%\<PC name>\<file name>", for example "%APPDATA%\mymachine\explorer.exe"
+
+With data: "<file name>", for example "explorer.exe"
+
+
+
+In subkey: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+
+Sets value: "%APPDATA%\<PC name>\<file name>", for example "%APPDATA%\mymachine\explorer.exe"
+
+With data: "<file name>", for example "explorer.exe"
+
+Spreads through...
+
+It can create the following copies on removable drives, such as USB flash drives:
+
+<drive>:\WinSystemKB001.exe
+
+It also creates an autorun.inf file in the root folder of the removable drive. The file has instructions to launch the malware automatically when the removable drive is connected to a PC with the Autorun feature turned on.
+
+This is a common way for malware to spread. However, autorun.inf files on their own are not necessarily a sign of infection; they are also used by legitimate programs.
+
+Payload
+
+Steals your sensitive information
+
+This threat can collect the following information from your PC:
+
+PC name
+
+User name
+
+Operating system version
+
+Product ID
+
+Installed antivirus products
+
+Local IP address
+
+It also checks to see if you PC is running:
+
+64-bit Windows
+
+with administrator privilege
+
+The malware can also search running processes for credit card data. It skips the following Windows processes:
+
+csrss.exe
+
+devenv.exe
+
+lsass.exe
+
+smss.exe
+
+spoolsv.exe
+
+winlogon.exe
+
+Contacts a remote host
+
+The malware connects to a remote command and control (C&C) server with a 'ping' message. If the server is available, it will reply a ‘pong’ message. The malware then sends information about your PC to, including:
+
+The current logged on user name
+
+PC name
+
+Windows operating system version
+
+Whether an antivirus is found or not
+
+Whether or not IP is using Network Address Translation (NAT)
+
+Bot version
+
+Windows serial number
+
+Below is an example of the HTTP request:
+
+GET /fav.php?getcmd=1&uid=<user name>&cn=<PC name>:<user name>&os=<Windows operating system version>&av=<Not+installed>&nat=yes&version=2.0&serial=<Windows serial>
+
+The remote server sends encoded data, usually in base64 format, that contains commands for the malware. This can include instructions to:
+
+Download and run files
+
+Record which keys you press
+
+Participate in DoS attacks
+
+Update itself
+
+Delete files and registry entries
+
+Find files on your PC
+
+Modify the system Hosts file
+
+Visit a URL using a hidden desktop
+
+Set the interval for retrieving commands from C&C
+
+We have seen the malware connect to following servers:
+
+count<removed>.com
+
+count<removed>.net
+
+hotlog2<removed>.net
+
+redtd<removed>.com
+
+traficins<removed>.net
+
+Additional information
+
+Checks for virtual environments
+
+This malware checks if it's running in virtualized, sandbox environment by looking for processes and analysis tools such as:
+
+Sandboxie
+
+SysAnalyzer
+
+QEmu
+
+Virtual Box
+
+VMware
+
+Wine
+
+It also checks for debuggers. To do this it checks for file names containing the following strings:
+
+\Sample
+
+\Virus
+
+Sandbox
+
+It also checks if the logged in user name contains any of the following strings:
+
+MALTEST
+
+TEQUILABOOMBOOM
+
+SANDBOX
+
+VIRUS
+
+MALWARE
+
+It also checks if any of the following modules are loaded:
+
+api_log.dll
+
+dbghelp.dll
+
+dir_watch.dll
+
+printfhelp.dll
+
+pstorec.dll
+
+sbiedll.dll
+
+vmcheck.dll
+
+wpespy.dll
+
+It also detects installed antimalware programs using Windows Management Instrumentation (WMI).
+
+If any of the above checks is true the malware will stop running and exit.
+
+Creates a mutex
+
+This threat can create the following mutexes:
+
+n3nmtx
+
+protected_n3utrino
+
+Analysis by Jasper Manuel and Rex Plantado

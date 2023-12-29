@@ -1,0 +1,85 @@
+Last week Adobe issued an advisory on a zero-day vulnerability (CVE-2011-2462) that has been being used in targeted attacks, probably defense contractors.
+
+The payload used is Sykipot, a know malware that has connections with several targeted attacks/0days during the past.
+
+During the analysis of this attack, I’ve found a new sample with a fresh command and control server (C&C).
+
+MD5: 4d979bb626e1e61cc4fc0cefefaa3ec7
+
+VirusTotal:
+
+Submission date:
+
+2011-12-12 00:39:51 (UTC)
+
+Result:
+
+25 /43 (58.1%)
+
+The binary drops a DLL:
+
+FileName: WSE4EF1.TMP
+
+MD5: 945FF23E9979A0867B7F3815BB0F9477
+
+Timestamp: 22/11/2011
+
+Original File Name: wship4.dll (IPv4 Helper DLL)
+
+The original malware scans the list of running process looking for outlook, iexplore or firefox. If found it injects the DLL into the process.
+
+After that, the binary will spawn a PDF file,
+
+FY 2012 Per Diem Rates - Effective October 1, 2011
+
+This file shows the continental United States “CONUS rates” for travelling expenses.
+
+The injected DLL will contact XXXhksrv.hostdefence.net/asp/kys_allow_get.asp?name=getkys.kys to download an encrypted configuration file. This file contains several commands that the victim will execute on the sending the results back to the C&C server.
+
+Example of configuration file:
+
+iexplore
+
+findpass2000
+
+process
+
+ipconfig /all
+
+netstat -ano
+
+net start
+
+net view /domain
+
+net group “domain admins” /domain
+
+tasklist /v
+
+net localgroup administrators
+
+dir c:*.url /s
+
+The domain info is:
+
+Domain Name: hostdefence.net
+
+Registrant:
+
+Amirhosein
+
+Amirhosein (parviz7415@yahoo.com)
+
+No 806 8th building YuLin City GuangXi Province
+
+Yu Lin
+
+Guang Xi,537500
+
+CN
+
+Tel. +86.7756853792
+
+Creation Date: 2011-11-14 15:35:24
+
+Expiration Date: 2012-11-14 15:35:24

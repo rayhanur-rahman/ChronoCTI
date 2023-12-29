@@ -1,0 +1,19 @@
+Trend Micro researchers recently detected activity targeting various organizations in the Middle East and neighboring regions. We were tipped off to this activity in part by research from Anomali, which also identified a campaign targeting similar victims. We believe (with moderate confidence) that this newly identified activity is connected to MuddyWater (also known as TEMP.Zagros, Static Kitten, Seedworm).
+
+Additionally, we were able to link the Anomali-identified activity to an ongoing campaign in 2021. This campaign uses the following legitimate remote admin tools such as:
+
+We have named this intrusion set Earth Vetala. Earth Vetala used spearphishing emails with embedded links to a legitimate file-sharing service to distribute their malicious package. The links were embedded within lure documents as well as emails.
+
+Once a victim was accessed, attackers would determine if the user account was an administrator or normal user. They would then download post-exploitation tools that included password/process-dumping utilities, reverse-tunneling tools, and custom backdoors. The threat actors would then initiate communications with additional command-and-control (C&C) infrastructure to execute obfuscated PowerShell scripts.
+
+Overview
+
+Analysis indicates the Earth Vetala campaign is ongoing and that this threat actor has interests which appear to align with Iran.
+
+Earth Vetala historically targets countries in the Middle East. In this campaign, Earth Vetala threat actors used spearphishing emails and lure documents against organizations within the United Arab Emirates, Saudi Arabia, Israel, and Azerbaijan. The phishing emails and lure documents contain embedded URLs linking to a legitimate file-sharing service to distribute archives containing the ScreenConnect remote administrator tool. ScreenConnect is a legitimate application that allows systems administrators to manage their enterprise systems remotely.
+
+Our research found threat indicators that were connected to the same campaign identified by Anomali. Analysis indicates that Earth Vetala is still ongoing as of the publishing of this post. During this campaign, threat actors used post-exploitation tools to dump passwords, tunnel their C&C communication using open-source tools, and use additional C&C infrastructure to establish a persistent presence within targeted hosts and environments.
+
+Technical Analysis
+
+During our research, we observed a spearphishing email allegedly from a government agency.

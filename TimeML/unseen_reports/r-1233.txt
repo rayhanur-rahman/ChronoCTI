@@ -1,0 +1,5 @@
+Online security is extremely important for people in Ukraine and the surrounding region right now. Government agencies, independent newspapers and public service providers need it to function and individuals need to communicate safely. Google’s Threat Analysis Group (TAG) has been working around the clock, focusing on the safety and security of our users and the platforms that help them access and share important information.
+
+This work continues our longstanding efforts to take action against threat actors in this region. In the last 12 months, TAG has issued hundreds of government-backed attack warnings to Ukrainian users alerting them that they have been the target of government backed hacking, largely emanating from Russia.
+
+Over the past two weeks, TAG has observed activity from a range of threat actors that we regularly monitor and are well-known to law enforcement, including FancyBear and Ghostwriter. This activity ranges from espionage to phishing campaigns. We’re sharing this information to help raise awareness among the security community and high risk users:

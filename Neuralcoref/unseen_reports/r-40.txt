@@ -1,0 +1,3 @@
+First observed in September 2020, Egregor is a sophisticated ransomware-as-a-service (RaaS) tool that appears to have been adopted by the Maze ransomware operators and their affiliates following the takedown of their own tool. It is used in high-profile attacks against large organisations globally.
+
+Despite bearing many similarities to Maze, it is unclear if Egregor was created by Maze's operators.

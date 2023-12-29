@@ -1,0 +1,9 @@
+The data revealed by Air India suggested that the massive data breach that affected multiple carriers was a
+
+result
+
+Group-IB
+
+Threat Intelligence analysts to look closer at the attack.
+
+In late May, Air India reported a massive passenger data breach. The announcement was preceded by data breaches in various airline companies, including. According to the public source data, these airlines use services of the same IT service provider. The media suggested the airline industry was facing "a coordinated supply chain attack". Air India was the first carrier to reveal more details about its security breach.of the compromise of the airline's IT service provider. That announcement promptedUsing its external threat hunting tools, Group-IB's Threat Intelligence team then discovered and attributed another previously unknown cyberattack on Air India with moderate confidence to the Chinese nation-state threat actor known as. The campaign was codenamed

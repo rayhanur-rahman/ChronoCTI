@@ -1,0 +1,521 @@
+The client supports several bot commands. The way they look in the GUI can be seen in Fig. 4.
+
+Figure 4. List of commands supported by the Lizar client
+
+This is what each of the commands does:
+
+Info — retrieve information about the system. The plugin for this command is located on the server. When a result is received from the plugin, the information is logged in the Info column.
+
+— retrieve information about the system. The plugin for this command is located on the server. When a result is received from the plugin, the information is logged in the column. Kill — stop plugin.
+
+— stop plugin. Period — change response frequency (Fig. 5).
+
+Figure 5. Period command in the Lizar client GUI
+
+Screenshot — take a screenshot (Fig. 6). The plugin for this command is located on the server. Once a screenshot is taken, it will be displayed in a separate window.
+
+Figure 6. Screenshot command in the Lizar client GUI
+
+List Processes — get a list of processes (Fig. 7). The plugin for this command is located on the server. If the plugin is successful, the list of processes will appear in a separate window.
+
+Figure 7. List Processes command in the Lizar client GUI
+
+Command Line — get CMD on the infected system. The plugin for this command is located on the server. If the plugin executes the command successfully, the result will appear in a separate window.
+
+— get CMD on the infected system. The plugin for this command is located on the server. If the plugin executes the command successfully, the result will appear in a separate window. Executer — launch an additional module (Fig. 8).
+
+Figure 8. Executer command in the Lizar client GUI
+
+Jump to — migrate the loader to another process. The plugin for this command is located on the server. The command parameters are passed through the client.ini.xml file.
+
+— migrate the loader to another process. The plugin for this command is located on the server. The command parameters are passed through the file. New session — create another loader session (run a copy of the loader on the infected system).
+
+— create another loader session (run a copy of the loader on the infected system). Mimikatz — run Mimikatz.
+
+— run Mimikatz. Grabber — run one of the plugins that collect passwords in browsers and OS. The Grabber tab has two buttons: Passwords + Screens and RDP (Fig. 9). Activating either of them sends a command to start the corresponding plugin.
+
+Figure 9. Grabber command in the Lizar client GUI
+
+Network analysis — run one of the plugins to retrieve Active Directory and network information (Fig. 10).
+
+Figure 10. Network analysis command in the Lizar client GUI
+
+Rat — run Carbanak ( RAT ). The IP address and port of the server and admin panel are set via the client.ini.xml configuration file (Fig. 11).
+
+Figure 11. Rat command in the Lizar client GUI
+
+We skipped the Company computers command in the general list – it does not have a handler yet, so we cannot determine exactly what it does.
+
+Lizar server
+
+The Lizar server application, similar to the Lizar client, is written using the .NET Framework. However, unlike the client, the server runs on a remote Linux host.
+
+Date and time of the last detected server version compilation: Fri Feb 19 16:16:25 2021 .
+
+The application is run using the Wine utility with the pre-installed Wine Mono ( wine-mono-5.0.0-x86.msi ).
+
+The server application directory includes the following components:
+
+client/keys — directory with encryption keys for proper communication with the client;
+
+— directory with encryption keys for proper communication with the client; loader/keys — directory with encryption keys for proper communication with the loader;
+
+— directory with encryption keys for proper communication with the loader; logs — directory with server logs ( client-traffic , error , info );
+
+— directory with server logs ( , , ); plugins — plugin directory;
+
+— plugin directory; ThirdScripts — directory with the ps2x.py script and the ps2p.py helper module. The ps2x.py script is designed to execute files on the remote host and is implemented using the Impacket project. Command templates for this script are displayed in the client application when the appropriate option is selected.
+
+Full list of arguments supported by the script.
+
+x64 — directory containing the SQLite.interop.dll auxiliary library file (64-bit version).
+
+— directory containing the auxiliary library file (64-bit version). x86 — directory containing the SQLite.interop.dll auxiliary library file (32-bit version).
+
+— directory containing the auxiliary library file (32-bit version). AV.lst — a CSV file containing the name of the process which is associated with the antivirus product, the name and description of the antivirus product.
+
+Several lines from the AV.lst file:
+
+data.db — a database file containing information on all loaders (this information is loaded into the client application).
+
+— a database file containing information on all loaders (this information is loaded into the client application). server.exe — server application.
+
+— server application. server.ini.xml — server application configuration file.
+
+Example contents of the configuration file:
+
+System.Data.SQLite.dll — auxiliary library file.
+
+Communication between client and server
+
+Before being sent to the server, the data is encrypted on a session key with a length ranging from 5 to 15 bytes and then on the key specified in the configuration (31 bytes). The encryption function is shown below.
+
+If the key specified in the configuration (31 bytes) does not match the key on the server, no data is sent from the server.
+
+To verify the key on the side of the server, the client sends a checksum of the key, calculated according to the following algorithm:
+
+Data received from the server is decrypted on a session key with a length ranging from 5 to 15 bytes, then on the same pair of session key and configuration key. Function for decryption:
+
+The client and the server exchange data in binary format. The decrypted data is a list of bots (Fig. 12).
+
+Figure 12. Example of decrypted data transmitted from server to client
+
+Lizar loader
+
+The Lizar loader is designed to execute commands by running plugins, and to run additional modules. It runs on the infected computer.
+
+As we have already mentioned, Lizar loader and Lizar plugins run on the infected system and can logically be combined into the Lizar bot component. The bot’s modular architecture makes the tool scalable and allows for independent development of all components.
+
+We’ve detected three kinds of bots: DLLs, EXEs and PowerShell scripts, which execute a DLL in the address space of the PowerShell process.
+
+The pseudocode of the main loader function, along with the reconstructed function structure, is shown in Fig. 13.
+
+Figure 13. Loader’s main function pseudocode
+
+The following are some of the actions the x_Init function performs:
+
+1. Generate a random key g_ConfigKey31 using the function SystemFunction036 . This key is used to encrypt and decrypt the configuration data.
+
+2. Obtain system information and calculate the checksum from the information received (Fig. 14).
+
+Figure 14. Pseudocode for retrieving system information and calculating its checksum
+
+3. Retrieve the current process ID (the checksum and PID of the loader process are displayed in the Id column in the client application).
+
+4. Calculate the checksum from the previously received checksum and the current process ID (labelled g_BotId in Figure 13).
+
+5. Decrypt configuration data: list of IP addresses, list of ports for each server. Configuration data is decrypted on 31-byte g_LoaderKey with XOR algorithm. After decryption, the data is re-encrypted on g_ConfigKey31 with an XOR algorithm. The g_LoaderKey is also used when encrypting data sent to the server and when decrypting data received from the server.
+
+6. Initialise global variables and critical sections for some variables. This is needed to access data from different threads.
+
+7. Initialise executable memory for plugin execution.
+
+8. Launch five threads which process the queue of messages from the server. This mechanism is implemented using the PostQueuedCompletionStatus and GetQueuedCompletionStatus functions. Data received from the server is decrypted and sent to the handler (Fig.15).
+
+Figure 15. Pseudocode algorithm for decrypting data received from the server and sending it for processing
+
+The handler accepts data using the GetQueuedCompletionStatus function.
+
+The vServerData→ServerData variable contains the plugin body after decryption (look again at Fig. 15). The algorithm's pseudocode for decrypting data received from the server is shown in Fig. 16.
+
+Figure 16. Pseudocode of the algorithm for decrypting data received from the server
+
+Before being sent to the server, the data structure has to pass through shaping as shown in Fig. 17.
+
+Figure 17. Pseudocode of the function that generates the structure sent to the server
+
+plugins from plugins directory
+
+The plugins in the plugins directory are sent from the server to the loader and are executed by the loader when a certain action is performed in the Lizar client application.
+
+The six stages of the plugins’ lifecycle:
+
+The user selects a command in the Lizar client application interface. The Lizar server receives the information about the selected command. Depending on the command and loader bitness, the server finds a suitable plugin from the plugins directory, then sends the loader a request containing the command and the body of the plugin (e.g., Screenshot{bitness}.dll ). The loader executes the plugin and stores the result of the plugin’s execution in a specially allocated area of memory on the heap. The server retrieves the results of plugin execution and sends them on to the client. The client application displays the plugin results.
+
+A full list of plugins (32-bit and 64-bit DLLs) in the plugins directory.
+
+CommandLine32.dll
+
+CommandLine64.dll
+
+Executer32.dll
+
+Executer64.dll
+
+Grabber32.dll
+
+Grabber64.dll
+
+Info32.dll
+
+Info64.dll
+
+Jumper32.dll
+
+Jumper64.dll
+
+ListProcess32.dll
+
+ListProcess64.dll
+
+mimikatz32.dll
+
+mimikatz64.dll
+
+NetSession32.dll
+
+NetSession64.dll
+
+rat32.dll
+
+rat64.dll
+
+Screenshot32.dll
+
+Screenshot64.dll
+
+CommandLine32.dll/CommandLine64.dll
+
+The plugin is designed to give attackers access to the command line interface on an infected system.
+
+Sending commands to the cmd.exe process and receiving the result of the commands is implemented via pipes (Fig. 18).
+
+Figure 18. CommandLine32.dll / CommandLine64.dll main function pseudocode
+
+Executer32.dll/Executer64.dll
+
+Executer32.dll / Executer64.dll launches additional components specified in the Lizar client application interface.
+
+The plugin can run the following components:
+
+EXE file from the %TEMP% directory;
+
+directory; PowerShell script from the %TEMP% directory, which is run using the following command: {path to powershell.exe} -ex bypass -noprof -nolog -nonint -f {path to the PowerShell script} ;
+
+directory, which is run using the following command: ; DLL in memory;
+
+shellcode.
+
+The plugin code that runs shellcode is shown in Fig. 19.
+
+Figure 19. Executer32.dll / Executer64.dll code running shellcode
+
+Note that the plugin file Executer64.dll contains the path to the PDB: M:\paal\Lizar\bin\Release\Plugins\Executer64.pdb .
+
+Grabber32.dll/Grabber64.dll
+
+Contrary to its name, this plugin has no grabber functionality and is a typical PE loader.
+
+Although attackers call it a grabber, the loaded PE file actually performs the functions of other types of tools, such as a stealer.
+
+Both versions of the plugin are used as client-side grabber loaders: PswRdInfo64 and PswInfoGrabber64 .
+
+Info32.dll/Info64.dll
+
+The plugin is designed to retrieve information about the infected system.
+
+The plugin is executed by using the Info command in the Lizar client application. A data structure containing the OS version, user name and computer name is sent to the server.
+
+On the server side, the received structure is converted to a special string (Fig. 20).
+
+Figure 20. Pseudocode snippet responsible for conversion of the received structure into a special string on the server
+
+Jumper32.dll/Jumper64.dll
+
+The plugin is designed to migrate the loader to the address space of another process. Injection parameters are set in the Lizar client configuration file. It should be noted that this plugin can be used not only to inject the loader, but also to execute other PE files in the address space of the specified process.
+
+Figure 21 shows the main function of the plugin.
+
+Figure 21. Jumper32.dll / Jumper64.dll main function pseudocode
+
+From the pseudocode above we see that the loader can migrate to the address space of the specified process in three ways:
+
+by performing an injection into the process with a certain PID;
+
+by creating a process with a certain name and performing an injection into it;
+
+by creating a process with the same name as the current one and performing an injection into it.
+
+Let’s take a closer look at each method.
+
+Algorithm for injection by process ID
+
+OpenProcess — The plugin retrieves the process handle for the specified process identifier ( PID ). VirtualAllocEx + WriteProcessMemory — the plugin allocates memory in the virtual address space of the specified process and writes in it the contents to be executed afterwards. CreateRemoteThread — the plugin creates a thread in the virtual address space of the specified process, with the lpStartAddress serving as the main function of the loader.
+
+If CreateRemoteThread fails, plugin uses the RtlCreateUserThread function (Fig. 22).
+
+Figure 22. Pseudocode for a function to create a thread in the virtual address space of the specified process
+
+Injection algorithm by executable file name
+
+1. The plugin finds the path to the system executable file to be injected. The location of this file depends on the bitness of the loader. 64-bit file is located in %SYSTEMROOT%\System32 directory, 32-bit — in %SYSTEMROOT%\SysWOW64 directory.
+
+2. The plugin creates a process for the received system executable, and receives the identifier of the created process.
+
+Depending on the plugin parameters, there are two ways to implement this step:
+
+If the appropriate flag is set in the structure passed to the plugin, the plugin creates a process in the security context of the explorer.exe process (Fig. 23).
+
+Figure 23. Running an executable in the security context of explorer.exe
+
+If the flag is not set, the executable file is started by calling the CreateProcessA function (Fig. 24).
+
+Figure 24. Calling CreateProcessA process
+
+3. The plugin allocates memory in the virtual address space of the created process and writes in it the contents, which are to be executed later ( VirtualAllocEx + WriteProcessMemory ).
+
+4. The plugin runs functions in the virtual address space of the created process in one of the following ways, depending on the bitness of the process:
+
+in case of the 64-bit process, a function is started with another function, shown in Fig. 25;
+
+Figure 25. Pseudocode of the algorithm for injecting into a 64-bit process
+
+in case of the 32-bit process, a function is started using the CreateRemoteThread and RtlCreateUserThread functions, which create a thread in the virtual address space of the specified process.
+
+Algorithm for injection into the same-name process
+
+The plugin retrieves the path to the executable file for the process in the address space of which it is running. The plugin launches this executable file and injects it into the created process.
+
+The pseudocode for this method is shown in Fig. 26.
+
+Figure 26. Pseudocode for injecting Jumper32.dll / Jumper64.dll into the same process
+
+ListProcesses32.dll/ListProcesses64.dll
+
+This plugin is designed to provide information on running processes (Fig. 27 and 28).
+
+Figure 27. Retrieving information about each active process
+
+Figure 28. Inserting the retrieved information to be sent to the server at a later time
+
+The following can be retrieved for each process:
+
+process identifier;
+
+path to the executable file;
+
+information about the user running the process.
+
+mimikatz32.dll/mimikatz64.dll
+
+The Mimikatz plugin is a wrapper for client-side Powerkatz modules:
+
+powerkatz_full32.dll
+
+powerkatz_full64.dll
+
+powerkatz_short32.dll
+
+powerkatz_short64.dll
+
+NetSession32.dll/NetSession64.dll
+
+The plugin is designed to retrieve information about all active network sessions on the infected server. For each session, the host address from which the connection is made can be retrieved, along with the name of the user initiating the connection.
+
+The pseudocode of the function in which the information is received is shown in Fig. 29 and 30.
+
+Figure 29. Retrieving network session information using WinAPI functions
+
+Figure 30. Inserting the information retrieved by the plugin to be sent to the server
+
+rat32.dll/rat64.dll
+
+The plugin is a simplified version of the Carbanak toolkit bot. As we reported at the beginning of this article, this toolkit is heavily used by the FIN7 faction.
+
+Screenshot32.dll/Screenshot64.dll
+
+The plugin can take a JPEG screenshot on the infected system. The part of the function used to save the resulting image to the stream is shown below (Fig. 31).
+
+Figure 31. The part of the function used to save a screenshot taken by the plugin to the stream
+
+The received stream is then sent to the loader to be sent to the server.
+
+plugins from the plugins/extra directory
+
+plugins from the plugins/extra directory are transferred from the client to the server, then from the server to the loader (on the infected system).
+
+List of files in the plugins/extra directory:
+
+ADRecon.ps1
+
+GetHash32.dll
+
+GetHash64.dll
+
+GetPass32.dll
+
+GetPass64.dll
+
+powerkatz_full32.dll
+
+powerkatz_full64.dll
+
+powerkatz_short32.dll
+
+powerkatz_short64.dll
+
+PswInfoGrabber32.dll
+
+PswInfoGrabber64.dll
+
+PswRdInfo64.dll
+
+ADRecon
+
+The ADRecon.ps1 file is a tool for generating reports that contain information from Active Directory. Read more about ADRecon project on GitHub. Note that this plugin is not developed by FIN7, however, it is actively used by the group in its attacks.
+
+GetHash32/GetHash64
+
+The plugin is designed to retrieve user NTLM/LM hashes. The plugin is based on the code of the lsadump component from Mimikatz.
+
+Fig. 32 shows a screenshot with pseudocode of exported Entry function (function names are chosen according to Mimikatz function names).
+
+Figure 32. Pseudocode of the exported Entry function for the GetHash plugin
+
+The return value of the Execute function (value of the g_outputBuffer variable) contains a pointer to the buffer with data resulting from the plugin's operation.
+
+If the plugin fails to start with SYSTEM permissions, it will fill the buffer with the data shown in Fig. 33.
+
+Figure 33. Buffer contents when running the plugin without SYSTEM permissions
+
+The contents of the buffer in this case are similar to the output of mimikatz when running the module lsadump::sam without SYSTEM permissions (Fig. 34).
+
+Figure 34. Mimikatz output when running lsadump::sam without SYSTEM permissions
+
+If the plugin is run with SYSTEM permissions, it will put all the information the attacker is looking for into the buffer (Fig. 35).
+
+Figure 35. Buffer contents when running the plugin with SYSTEM permissions
+
+The same data can be retrieved by running lsadump::sam from mimikatz with SYSTEM permissions (Fig. 36).
+
+Figure 36. Result of lsadump::sam command from mimikatz with SYSTEM permissions
+
+GetPass32/GetPass64
+
+The plugin is designed to retrieve user passwords. It is based on the code of the sekurlsa component from Mimikatz. The pseudocode of the exported Entry function is shown in Fig. 37.
+
+Figure 37. Exportable Entry function pseudocode
+
+Based on the plugin’s results, we will see in the value of the g_outputBuffer variable a pointer to the data buffer that can be retrieved by executing the sekurlsa::logonpasswords command in Mimikatz (Fig. 38).
+
+Figure 38. Result of the sekurlsa::logonpasswords command
+
+powerkatz_full32/powerkatz_full64
+
+The plugin is a Mimikatz version compiled in the Second_Release_PowerShell configuration. This version can be loaded into the address space of a PowerShell process via reflective DLL loading as implemented in the Exfiltration module of PowerSploit.
+
+Pseudocode of the exported powershell_reflective_mimikatz function (variable and function names in the decompiled output are changed to match the names of the corresponding variables and functions from Mimikatz):
+
+The input parameter is used to pass a list of commands, separated by a space. The global variable outputBuffer is used to pass the result of the commands. The decompiled view of the wmain function is shown below:
+
+powerkatz_short32/powerkatz_short64
+
+The powerkatz_short plugin is a modified version of the standard powerkatz library described in the previous paragraph.
+
+A list of powerkatz functions that are absent from powerkatz_short :
+
+kuhl_m_acr_clean ;
+
+; kuhl_m_busylight_clean ;
+
+; kuhl_m_c_rpc_clean ;
+
+; kuhl_m_c_rpc_init ;
+
+; kuhl_m_c_service_clean ;
+
+; kuhl_m_crypto_clean ;
+
+; kuhl_m_crypto_init ;
+
+; kuhl_m_kerberos_clean ;
+
+; kuhl_m_kerberos_init ;
+
+; kuhl_m_vault_clean ;
+
+; kuhl_m_vault_init ;
+
+; kull_m_busylight_devices_get ;
+
+; kull_m_busylight_keepAliveThread .
+
+PswInfoGrabber32.dll/PswInfoGrabber64.dll
+
+The plugin can retrieve the following data:
+
+browser history from Firefox, Google Chrome, Microsoft Edge and Internet Explorer;
+
+usernames and passwords stored in the listed browsers;
+
+email accounts from Microsoft Outlook and Mozilla Thunderbird.
+
+The nss3.dll library is used to retrieve sensitive data from the Firefox browser and is loaded from the directory with the installed browser (Fig. 39).
+
+Figure 39. Dynamic retrieval of function addresses from nss3.dll library
+
+Using the functions shown in Fig. 38, the credentials are retrieved from the logins.json file and the browser history is retrieved from the places.sqlite database.
+
+In relation to Google Chrome, the plugin retrieves browser history from %LOCALAPPDATA%\Google\Chrome\User Data\Default\History and passwords from %LOCALAPPDATA%\Google\Chrome\User Data\Default\Login Data (data encrypted using DPAPI).
+
+History , places.sqlite , Login Data are all sqlite3 database files. To work with sqlite3 databases the plugin uses functions from the sqlite library, statically linked with the resulting DLL, i.e. the plugin itself.
+
+For Internet Explorer and Microsoft Edge browsers, the plugin retrieves user credentials using functions from the vaultcli.dll library that implements the functions of the vaultcmd.exe utility.
+
+PswRdInfo64.dll
+
+PswRdInfo64.dll is designed primarily to collect domain credentials and retrieve credentials for accessing other hosts via RDP. The plugin is activated from the client application using the Grabber → RDP tab.
+
+The workflow of the plugin depends on the following conditions.
+
+When started from SYSTEM, the plugin lists all active console sessions ( WTSGetActiveConsoleSessionId ) and gets user names for these sessions:
+
+(WTSQuerySessionInformationW)(0i64, SessionId, WTSUserName, &vpSessionInformationUserName, &pBytesReturned))
+
+The plugin then retrieves the private keys from the C:\Users\{SessionInformationUserName}AppData\Local\Microsoft\Credentials directory for each user and injects itself into the lsass.exe process to extract domain credentials.
+
+When started by another user (other than SYSTEM ), the plugin attempts to collect credentials for RDP access to other hosts. Credentials are collected using CredEnumerateW function, with the TERMSRV string as the target.
+
+Conclusion
+
+As the analysis shows, Lizar is a diverse and complex toolkit. It is currently still under active development and testing, yet it is already being widely used to control infected computers, mostly throughout the United States.
+
+However, it seems that FIN7 are not looking to stop there, and we will soon be hearing about more Lizar-enabled attacks from around the world.
+
+IoC
+
+IP:
+
+108.61.148.97
+
+136.244.81.250
+
+185.33.84.43
+
+195.123.214.181
+
+31.192.108.133
+
+45.133.203.121
+
+SHA256:

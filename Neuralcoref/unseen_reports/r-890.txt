@@ -1,0 +1,57 @@
+Contributor: Val S.
+
+We recently came across a sample of a back door remote access tool (RAT) written entirely in Java. The RAT is freely distributed on underground forums, free for any registered forum user to download. It is named Frutas, which means “fruit” in Spanish.
+
+
+
+Figure 1. Frutas logo
+
+
+
+The Frutas RAT allows attackers to create a connect-back client JAR file to run on a compromised computer. When executed, it parses an embedded configuration file for a server IP and port to connect to. The back door builder provides some minor obfuscation, which allows the attacker to use a custom encryption key for some of the embedded back door functionalities.
+
+
+
+Figure 2. Back door client creation
+
+
+
+Upon receiving a back door connection, the RAT server alerts the attacker and allows them to perform various back door functions on the compromised computer, including:
+
+Query or kill system processes
+
+Browse file systems
+
+Download and execute arbitrary files
+
+Send popup messages
+
+Open a specified website in a browser
+
+Perform denial of service attacks against a specified IP address
+
+Figure 3. Back door functionality
+
+
+
+Figure 4. Example pop-up message sent to users
+
+
+
+The back door Java file uses a custom class loader that loads encrypted class files (named Opcion[1-14]) as it receives commands from the RAT controller server. The key, specified by the attacker when creating the back door, is used to encrypt the class files using DES as a stream cipher.
+
+
+
+Figure 5. Back door Java decompilation
+
+
+
+This is a low prevalence remote access tool that is targeted at, although not limited to, the Spanish hacker base. This can be seen in the low detection rate. Symantec detects the back door controller and builder as Hacktool and the back door as Backdoor.Trojan.
+
+
+
+Figure 6. Current detection status
+
+
+
+To protect yourself from becoming a victim of this remote access tool it is essential that you keep your computer up to date by applying the latest updates, along with keeping your antivirus definitions up to date.

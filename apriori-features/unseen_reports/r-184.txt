@@ -1,0 +1,60 @@
+Yesterday’s blog spoke about the obfuscation techniques employed by Trojan.Hydraq. As it turns out these techniques are not new, had been used by various malware in the past, and are not too tricky to get around. This entry examines the techniques employed by this threat in order to stay active on a compromised computer and survive a restart.
+
+
+
+Hydraq takes advantage of the Svchost.exe process in Windows. When a Windows system starts up it checks the following registry key:
+
+
+
+HKEY_LOCAL_MACHINE\Software\Microsoft\WindowsNT\CurrentVersion\Svchost
+
+
+
+These entries are referred to as service groups. The information under this key will have all the information required by the operating system in order to load the service group into memory. The following screenshot shows the services loaded into a particular instance of svchost on a clean computer:
+
+
+
+
+
+
+
+Hydraq creates the appropriate service groups and Windows does the rest.
+
+
+
+The Hydraq dropper performs the following actions. First, a randomly named service is created along with and a new service group named SysIns. Next, %System%\rasmon.dll is added as a serviceDLL in the SysIns service group . The dropper then executes the following:
+
+
+
+C:\Windows\System32\svchost.exe –k SysIns
+
+
+
+This causes rasmon.dll to load and execute. In its initialization routine rasmon.dll deletes the randomly named service and creates another new service. The name of this service will be of the form:
+
+
+
+RaS[4 RANDOM CHARACTERS]
+
+
+
+For example: RaSfitz. Again this points to %System%\rasmon.dll , and this time is added as a serviceDLL to the existing netsvcs service group. It will be automatically loaded and executed by svchost on startup.
+
+
+
+This is an effective technique which can be used to help malware persist on a compromised computer. However, while effective this technique is neither new, nor complex. W32.Downadup is an example of malware that sucessfully employed this exact same technique.
+
+
+
+Removing this load point, along with the file, and rebooting will effectively remove the threat from the system.
+
+
+
+More information on service groups of Windows can be found here.
+
+
+
+Next: Trojan.Hydraq's Backdoor Capabilities
+
+Previous: Seeing Past Trojan.Hydraq’s Obfuscation
+

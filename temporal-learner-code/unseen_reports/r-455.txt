@@ -1,0 +1,1 @@
+Cobalt Strike 4.9.1 is now available. This is an out of band update to fix an issue that was discovered in the 4.9 release that

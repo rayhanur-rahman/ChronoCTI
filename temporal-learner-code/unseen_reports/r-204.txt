@@ -1,0 +1,29 @@
+The latest variant of the Zeroaccess Trojan—Trojan.Zeroaccess.C—makes use of a novel technique to store its malicious content: it exploits a feature provided by the NT File System called Extended Attributes (EA).
+
+Even before Zeroaccess.C, malware authors have been looking for new ways to hide their malicious creations by making use of a specialized API provided by the file system. Two notable examples are the use of Alternate Data Streams (ADS) and Encrypted File System (EFS).
+
+Trojan.Zeroaccess.C uses ZwSetEaFile to write the malicious payload into the EA data of the file %System%\services.exe and ZwQueryEaFile respectively to retrieve and execute it. The threat patches the code to read and execute the EA data directly into the services.exe file by overwriting a portion of the original initialization code:
+
+
+
+
+
+
+
+ZwQueryEaFile returns a FILE_FULL_EA_INFORMATION structure containing the malicious payload as shown below:
+
+
+
+
+
+
+
+It must be noted here that the infected system file—services.exe—cannot be repaired automatically with the information provided by the file alone because a portion of its original code has been permanently overwritten by the threat, forcing the user to restore the file manually from a clean backup. Windows Vista and later versions of Windows makes things easier by offering the option to restore the file to a previous version by right-clicking on the file and selecting Restore previous versions.
+
+Such infected services.exe files are detected as Trojan.Zeroaccess!inf4 by Symantec products.
+
+As with other NTFS features, accessing the EA requires a specialized API and usually malware writers employ these techniques in the hope that antivirus products do not support them. This results in the payload remaining functional for longer periods of time.
+
+As far as Trojan.Zeroaccess.C is concerned, making use of EA marks a new point in its struggle to diversify. This new version does not include the rootkit component anymore, and it infects both x86 (32-bit) and x64 (64-bit) versions of the services.exe file.
+
+Throughout Zeroaccess’ life span we have seen several novel techniques that posed various challenges; however, the antivirus industry has quickly adapted and responded with new technologies.

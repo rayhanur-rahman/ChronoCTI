@@ -1,0 +1,19 @@
+A Look Into Konni 2019 Campaign Doron Karmi · Follow Published in d-hunter · 11 min read · Jan 4, 2020 -- Listen Share
+
+Konni is a remote administration tool, observed in the wild since early 2014. The Konni malware family is potentially linked to APT37, a North-Korean cyber espionage group active since 2012. The group primary victims are South-Korean political organizations, as well as Japan, Vietnam, Russia, Nepal, China, India, Romania, Kuwait, and other parts of the Middle East.
+
+Map chart of APT37 main targets
+
+The latest activities leveraging the Konni malware family potentially target political organizations and politically motivated victims in Russia and South-Korea. During my research, I observed 3 distinct campaigns throughout 2019: starting from January to late September.
+
+Konni Infection chain consists of multiple stages and utilizes living-off-the-land binaries in its operation from the use of certutil.exe to download additional files and decode their content to sc.exe and reg.exe for persistence.
+
+These campaigns leverage similar C2 infrastructure for the delivery and a specific free FTP service used for exfiltration the stolen data from the affected targets. Additionally, the macro-armed lure documents used to deliver and install the Konni payloads have similarities across all 3 campaigns.
+
+Konni is a modular malware that collects reconnaissance data on the target machine prior to sending further modules to the victim. We were unable to find additional operations related to the Konni malware family that might reveals further capabilities and malware types used by the group associated with Konni activity.
+
+During our analysis I found overlapping between the Konni infection chain, tools and technique used by the Syscon backdoor [1] using a service called COMSysApp to load the payload as a service DLL as a mean to achieve persistence on the victim machine. Although similarities have been observed between Konni and Syscon, at this time we can’t say with full certainty that the same threat actor is behind both operations.
+
+Campaign Timeline
+
+Execution flow

@@ -1,0 +1,89 @@
+Jared Stroud
+
+Cloud Security Researcher – Lacework Labs
+
+The Takeaways
+
+TeamTNT targets exposed Docker API to deploy malicious images.
+
+Docker images containing TeamTNT malware are being hosted in public Docker repos via account takeovers.
+
+TeamTNT leverages exposed Docker hub secrets within GitHub to stage malicious Docker images.
+
+The following MITRE ATT&CK techniques were observed: Deploy Container ( T1610 ), User Execution: Malicious Image ( T1204.003 ), Unsecured Credentials: Credentials In Files ( T1552.002 ), Implant Internal Image ( T1525 ), and Valid Accounts: Cloud Accounts ( T1078.004 ).
+
+Summary
+
+TeamTNT staged malicious images on Docker Hub using a legitimate user’s Docker Hub account. The credentials to the Docker Hub account were accidentally committed to a public GitHub repo, where we believed TeamTNT gained initial access to the account. Lacework Labs notified Docker Security and the owner of the targeted account (megawebmaster) who quickly took action disrupting TeamTNT staged Docker containers by removing them from Docker Hub.
+
+Caught in The Honeypot
+
+The Lacework Labs Research team deploys a number of various honeypots to collect data on common services deployed in cloud environments. This “farm to table” approach allows us to organically source opportunistic attacks against exposed mock infrastructure. Lacework Labs’ Docker API honeypot caught the following request which revealed a container image of name “dockgeddon” from the Megawebmaster account being created (T1610).
+
+Docker Honeypot – Container Creation Request
+
+Upon inspecting this Docker image, TeamTNT utilities were identified within containers from the Docker hub account “Megawebmaster”. Highlighted in red in the image above include the image being pulled (megawebmaster/dockgeddon) , the host mount bind configuration mounting the host’s root to /host within the container. The network mode being set to the host along with the container trying to be deployed as a privileged container. The Docker Hub account of MegawebMaster has numerous public images, five of which have TeamTNT utilities with a significant amount of downloads. These five images include dockgeddon, docker, tornadopw, and dcounter (T1204.003).
+
+Docker Hub Malicious Image Hosting
+
+Pivoting on the username “Megawebmaster”, a GitHub account was discovered that had a configuration file containing Docker Hub secrets (T1552.001). It is believed that TeamTNT leveraged this configuration file to upload malicious Docker images to this user’s Docker Hub account (T1525). Lacework Labs contacted the owner of the GitHub account as well as Docker Security to both remove the exposed Docker credentials and malicious Docker images.
+
+Exploring the Docker Images
+
+The Open Source utility “dive” allows for the exploration of each layer of a Docker image. This allows for quick triage of a Docker image to understand what files were added to what layer. For each Docker image listed below, Lacework Labs leveraged dive to identify the files of interest, and then copied the files out of the Docker container to perform further triage.
+
+Docker Image – Dockgeddon
+
+In the “dockgeddon” image, three malicious utilities were identified. These utilities included a variant of the IRC bot Tsunami (TNTfeatB0rg), a banner grabbing utility (zgrab) and their spreading utility init.sh. The image below shows the dive utility displaying these files and where they’re located within the Docker image.
+
+Dive inspect Docker Image
+
+After obtaining the TNTFeatB0RG binary from the Docker image and analyzing it in Ghidra, known IPs and domains associated with TeamTNT were identified.
+
+Ghidra Analysis of TNTfeatB0rg
+
+Additional modifications to TNTFeatB0RG included executing base64 commands within the binary via system function calls. The embedded base64 payload is a bash script used to steal AWS credentials from the AWS metadata service hosted at 169.254.169.254 (T1078.004).
+
+Ghidra – Execution of base64
+
+Embedded Base64 AWS Secret Stealer Script
+
+The init.sh utility downloads XMRig to begin mining Monero on the victim host. The associated wallet shows multiple workers currently being used to further TeamTNT’s illicit mining operation.
+
+Status of Monero Wallet
+
+Docker Image – small
+
+The Docker image called “small” contained three files “dockerd”, “kernel”, and “init.sh”. The binary entitled “kernel” was another Tsunami variant that called out to the same TeamTNT IRC servers seen in dockgeddon. However, this variant joins channel “ #DockerAPI ” whereas the dockgeddon joins IRC channel “ #masspwn ”. They also both share the process name of “ kworker/08:15-events ”
+
+Ghidra decompilation of Dockgeddon Docker image Tsunami IRC bot (left) and smallDocker image Tsunami – IRC bot (right)
+
+Also different within this Tsunami variant compared to the dockgeddon was the lack of embedded base64 payloads. The Ghidra decompiled output below shows how TeamTNT’s Tsunami variants differ. These small changes amongst the Tsunami bots show continually evolving TTPs in place by TeamTNT.
+
+Ghidra – Difference of of Tsunami bots main function
+
+The “dockerd” binary is a UPX packed Ezuri binary which downloads a XMRig binary. This binary then runs as “ kworker/13:37 ” and leverages the same wallet that is within the dockgeddon image.
+
+TeamTNT XMRig Config
+
+The init.sh script is a wrapper for WeaveWorks scope utility which is typically used for management of a container environment (T1613). By leveraging scope, remote access and visibility to a victim’s environment can be obtained through the WeaveWorks UI.
+
+TeamTNT Leveraging WeaveWorks’ Scope
+
+Docker Image – dcounter
+
+Within the dcounter image only one script (init.sh) was identified. This script leverages the free iplogger.org service which allows the tracking of end-users when they access a specific resource. In this scenario, TeamTNT is leveraging it as a notification service. Every time their Docker container “dcounter” is executed, this resource is accessed thus logging the victim’s IP. Additionally, the TeamTNT infrastructure is also hosting what the Lacework Lab research teams believes to be an end-point logging service at the IP address listed in the image below.
+
+TeamTNT Tracking Script
+
+Docker Image – tornado
+
+The tornado Docker image contains one script entitled “tornado.sh”. This utility leverages massscan and zgrab to conduct reconnaissance based on the target IP range and ports given to the container. If a key phrase of “Home page – Select or create a notebook”, “Kubeflow Central Dashboard”, “Jupyter Lab” or “JupyterLab” the “jq” utility then filters out the IP address of these matches which are then added to an array of “ rndstr ”. The results of this data are then sent to a TeamTNT controlled IP. Lacework Labs assesses with medium-to-high confidence these results than are targeted for further offense.
+
+TeamTNT Scanning Script
+
+Conclusion
+
+TeamTNT continues to target cloud infrastructure in order to gain access, perform Cryptojacking operations and exfiltrate cloud secrets. Ensuring cloud environments are not running exposed unauthenticated endpoints is critical in avoiding opportunistic attackers from gaining access to your environment. Understanding your deployed container/Kubernetes attack surface and cloud workloads attack surface is paramount in today’s changing cloud landscape. All IOCs can be found on the Lacework Labs GitHub. Also, please follow @LaceworkLabs Twitter or LinkedIn to keep up with our latest research.
+
+IOCs

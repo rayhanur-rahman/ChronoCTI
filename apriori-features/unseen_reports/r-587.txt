@@ -1,0 +1,65 @@
+Over the past 48 hours, there has been a frenzy of reporting and activity around a fresh outbreak of ransomware which we call NotPetya, so called because we do not see sufficient overlap between this malware and the ransomware variants Petya and GoldenEye, which were initially reported as being responsible for the outbreak. NotPetya comes hot on the heels of the WCry ransomware outbreak in May, and much like Wcry, it raises some interesting questions.
+
+The first – and arguably most important question – is how organisations can protect themselves now and in the future. Then there are the usual questions around the how, what, who, and why – this particular outbreak doesn't fit the mould of a classic criminal money making scheme. Finally, there are more philosophical questions surrounding the balance between speed and accuracy in sharing information and the importance of verified patching for anyone who receives updates for their third party software (which is everyone).
+
+What Do You Need To Do To Protect Yourself Right Now?
+
+First, until it is clear that it no longer poses a risk, block updates for MEDoc, the Ukrainian accounting software which has exploded into the public consciousness in the past two days as the likely source of infection. Specifically, the domain upd . me-doc . com . ua and its associated IP address 92 . 60 . 184 . 55, have been identified as the distribution point for MEDoc software updates.
+
+Having done that, the reality is if you haven't been hit by this outbreak by now then you probably won't be. The propagation from an infected machine typically occurs in the hour or two between the initial infection and the system reboot instigated by the malware, at which point the machine becomes unusable.
+
+That said, there are a number of steps organisations can take to protect themselves against ransomware attacks in general and against the specific techniques observed with NotPetya. General recommendations include:
+
+Have a resilient (offline) backup solution
+
+Make sure that systems are updated regularly with verified patches
+
+Develop and regularly exercise an organisational incident response plan
+
+Additionally, some specific recommendations for NotPetya include:
+
+Disable SMBv1 wherever possible.
+
+Ensure that the Microsoft patch MS17-010 has been applied.
+
+Create the file C:\Windows\perfc, which will prevent the ransomware element running if it tries to write itself to that location using the same filename . (This would be ineffective if the payload filename is changed in any new waves of NotPetya infections, and given the low likelihood of further infections from this wave is not worth expending significant effort on).
+
+. (This would be ineffective if the payload filename is changed in any new waves of NotPetya infections, and given the low likelihood of further infections from this wave is not worth expending significant effort on). Add known indicators to endpoint protection systems to detect and ideally prevent execution of NotPetya on the host.
+
+Follow best practice to harden Windows against attempts to steal credentials – see for example this advisory from Microsoft.
+
+Where infected machines that have not yet rebooted are identified, isolate them on the network and consider disabling scheduled tasks to prevent the ransomware from restarting the machine. This might provide some additional time to recover unencrypted files from the machine.
+
+NotPetya Attack – What Happened?
+
+We've discussed mitigation tactics but how did we get here? Let's take a step back and look at what is believed to have happened based on what we know so far.
+
+MEDoc is accounting software that is prevalent in the Ukraine, and therefore exists on the networks of most large organisations that do business there. The software is designed to periodically communicate out to the internet for any updates, and if found, download and install them. On 27 June, the software found and downloaded a fresh update. However, the content that was retrieved contained the NotPetya malware. NotPetya executed on the initial machine on which it was downloaded. The way in which NotPetya operates has been described at length across a variety of sources, but in general terms, it modifies the boot loader (meaning the machine is unable to load the operating system following a reboot), schedules a reboot to take place in approximately one or two hours from that point, encrypts files on the drive, attempts to steal credentials from memory, and attempts to propagate through the network using stolen credentials or exploits.
+
+At the time of this post, the global impact varies depending on country and on whether organisations have operations in Ukraine. Based on the news outlet reporting, a number of those that have been affected have been hit hard. It may take some time for those organizations to recover.
+
+The Threat Actors and Motivations behind NotPetya
+
+Like most ransomware campaigns, this NotPetya attack appears to have had all the hallmarks of a criminal enterprise aimed at making money. However, we considered that hypothesis alongside a competing theory, which is that rather than being motivated by financial gain, these attackers created a disruptive attack masquerading as a ransomware campaign, and based on our investigation, it has been determined that the latter was more likely. While we recognise the possibility that this was a traditional ransomware campaign with some elements of poor execution, based on what we currently know, which we outline below, it is more likely that those apparent mistakes reflect elements of the campaign that were not important to the actor's ultimate goal.
+
+We considered the following factors when determining the motives of the threat actor:
+
+It would be difficult for anyone to actually get their files back. A single email address was provided for individuals to contact, to provide proof of payment. Within hours, this account had been disabled by the provider. This creates a single point of failure which suggests that the actor had little interest in decrypting anyone's files. Previous Petya/GoldenEye variants had corresponding themed portals, hosted on TOR sites that detailed step-by-step how to recover files. This was not the case for the NotPetya campaign.
+
+Coupling SMB exploits with the use of credential stealing techniques as a means of propagating across an infected network is relatively novel, and demonstrates a level of technical competency. Compromising a legitimate software update as a delivery mechanism indicates careful operational planning and pre-positioning. Anyone taking inspiration from the WCry outbreak would have had to have developed and executed their plan in a reasonably short period of time, which would require expertise and resources.
+
+There are also some circumstantial observations which would suggest that Russia-based actors could be responsible:
+
+Exploiting MEDoc suggests a clear focus on Ukraine. There is a significant body of media reporting[1] alleging Russian cyberattacks against targets in Ukraine.
+
+The outbreak commenced the day before Ukrainian Constitution Day, which is on 28 June. This is a significant marking of Ukraine's independence, suggesting a symbolic political motivation. It could also simply have been attempting to take advantage of the public holiday's reduced staffing levels.
+
+Weighed against these observations is the fact that there were a significant number of Russian victims along with a number of victims worldwide who were badly affected. It is difficult to differentiate between collateral damage and the intended impact. It is also difficult to determine whether the actor responsible realised how widely MEDoc is used or how effectively the malware would spread once on a network. Of course, these observations support the idea that this attack intended to cause widespread disruption with a significant concentrated impact directed at Ukraine
+
+Broader implications of NotPetya
+
+Regardless of the threat actors behind NotPetya, this is unlikely to be the last time we see malicious activity which is able to spread far and fast, with the ability to impact a large number of organisations. Much like WCry, this episode reinforces the need to adopt best practices throughout the cybersecurity and business communities.
+
+First, and most practical, is about the application of third party updates. Best practice suggests that third party patches should be tested on isolated systems in a controlled way, prior to being rolled out to live environments. While from a practical perspective this might be challenging to achieve, NotPetya demonstrates what can happen when this standard practice isn't applied. Anything downloaded from the internet that will run in a live environment alongside business critical data should be handled with care.
+
+It is also important to strike the right balance between accuracy and speed in sharing threat information. When an attack proliferates quickly and broadly, it can become difficult to filter out valuable intelligence from noise in the space which creates a risk of hasty actions based on inaccurate data. There will always be an understandable desire to rush to share information in order to help peers, journalists, or the cybersecurity community at large. Pooling and sharing intelligence can be extraordinarily valuable, but it is incumbent on researchers, organisations, and experts who publicly comment on these stories to seek validation of their facts. We can't all be right, and we can't all be first, but we should all seek to strike an appropriate balance between the two, for the benefit of those who have been and could be impacted.

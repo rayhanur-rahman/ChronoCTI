@@ -1,0 +1,3 @@
+GitHub & BitBucket HTML Preview
+
+Enter URL of the HTML file to preview:

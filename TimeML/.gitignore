@@ -1,0 +1,17 @@
+
+# Backup files, python byte code, Apple folder attributes
+*~
+*pyc
+.DS_Store
+
+# The settings file will be different for everyone so don't keep it in revision
+# control
+/config.txt
+
+# Python anydbm files created from versioned text files, code runs without these
+# files (but should speed up with them)
+library/evita/dictionaries/wn*.db
+
+.idea
+
+utilities/get_issues.*

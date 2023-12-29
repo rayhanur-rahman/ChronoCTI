@@ -1,0 +1,27 @@
+Shell.exe launches cmd.exe, which then launches the tool to execute the given command. It could also be shown launching tools it has installed — such as Toola.exe — in the diagram. This kind of diagram is straightforward, making it easy to identify suspicious objects and determine the basic flow of how things work in an attack.
+
+In this incident, the root cause analysis begins with services.exe and ends with the executed tool or command. There was no evidence that a multi-stage tool that drops other tools were ever used, and based on the access the attackers had in this model, it is highly probable they had no use for such a tool. The machines were so accessible that the attackers could run any tool they needed without having to think of clever mechanisms to install the binary (such as moving it laterally from one machine to another) — in other words, tools can be run virtually on demand. Take, for instance, the installation of the keylogger; the attackers dropped the keylogger file via server message block (SMB) and issued a separate command to create its persistence mechanism. They did not use a keylogger that creates its own persistence mechanism, likely because it is not difficult for them to create the registry entry for persistence remotely.
+
+Meaningful root cause analysis chains are difficult to come by because everything starts with services.exe (or another windows process in cases of file dropping, for instance) running one command/tool at a time. The resulting chain can look more like a “tree” with services.exe at the center, where each branch represents a command executed through services.exe.
+
+Our analysis shows that the technique used in the attack hinders the ability of security researchers to piece together the sequence of events via a short diagram. However, certain features of EDR are designed to handle incidents like this.
+
+Mitigation Through Suspicious Events
+
+Suspicious events are effective triggers of an EDR solution, and the capability to mitigate through the same solution is ideal for blue teams. In this incident, Trend Micro Managed XDR utilized the Apex One capabilities to both investigate and mitigate the threat in the same software suite.
+
+Investigation Through Logged Events
+
+Conventional incident response methodology would often require running a tool to acquire evidence from a suspect host. In this investigation, everything was done through the examination of EDR logged events. No memory or disk image acquisition was done for the investigation, which means that the data collected by EDR was enough to determine how similar attacks work. The chronological order of the commands were taken from the time stamps of the events. Even without the self-explanatory diagram EDR creates, it is still possible to determine how the attack took place.
+
+
+
+New Alerts
+
+EDR allows for the painless creation of alerts to trigger an investigation. In this case, new alerts can be created whenever services.exe launches cmd.exe and when %comspec% is written to an autostart registry entry, which can help future threat hunting capabilities for blue teams.
+
+Trend Micro Solutions
+
+The Trend Micro XDR solution protects connected emails, endpoints, servers, cloud workloads, and networks by using powerful AI and security analytics to correlate data and provide an optimized set of alerts via a single console. With this technology, organizations can quickly identify threats and remediate their impact in a timely manner.
+
+Trend Micro Managed XDR offers expert threat monitoring, correlation, and analysis from experienced cybersecurity industry veterans, providing 24/7 service that allows organizations to have one single source of detection, analysis, and response. This service is enhanced by solutions that combine AI and Trend Micro’s wealth of global threat intelligence.

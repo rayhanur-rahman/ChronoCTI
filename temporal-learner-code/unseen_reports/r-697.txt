@@ -1,0 +1,7 @@
+The wrapper JAR file drops a secondary JAR file and copies it to a %Temp% location. The payload JAR file can be extracted using AES decryption. The first 16 bytes in the file “k” seen in Figure 4 contains the key and the file “e” is the encrypted Java payload.
+
+The JAR runs every time Windows starts, and starts executing and connecting to its command and control (C&C) server at 84.[REMOVED].132.145. It uses a WMIC interface to identify antivirus products installed on the compromised computer and firewall details.
+
+wmic /node:localhost /namespace:\\root\SecurityCenter2 path AntiVirusProduct get /format:list
+
+The configuration file and key file are visible, but the former is AES-encrypted. The JAR file contains various classes for platform-specific implementations for capturing screenshots, playing audio, downloading and executing files, I/O to and from files, logging keystrokes, among others.

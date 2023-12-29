@@ -1,0 +1,15 @@
+Symantec, a division of Broadcom (NASDAQ: AVGO), has uncovered an additional piece of malware used in the SolarWinds attacks which was used against a select number of victims that were of interest to the attackers.
+
+Raindrop (Backdoor.Raindrop) is a loader which delivers a payload of Cobalt Strike. Raindrop is very similar to the already documented Teardrop tool, but there are some key differences between the two. While Teardrop was delivered by the initial Sunburst backdoor (Backdoor.Sunburst), Raindrop appears to have been used for spreading across the victim’s network. Symantec has seen no evidence to date of Raindrop being delivered directly by Sunburst. Instead, it appears elsewhere on networks where at least one computer has already been compromised by Sunburst.
+
+Raindrop attacks
+
+In one victim, in early July 2020, Sunburst was installed through the SolarWinds Orion update, as has been well documented. Two computers were compromised.
+
+The following day, Teardrop was subsequently installed on one of these computers. That computer was found to have an active directory query tool, as well as a credential dumper designed specifically for SolarWinds Orion databases. The credential dumper was similar to, but not the same as, the open source Solarflare tool.
+
+Eleven days later, on a third victim computer in the organization, where no previous malicious activity had been observed, a copy of the previously unseen Raindrop was installed under the name bproxy.dll. This computer was running computer access and management software. The attackers could have used this software to access any of the computers in the compromised organization.
+
+One hour later, the Raindrop malware installed an additional file called "7z.dll". We were unable to retrieve this file, however, within hours a legitimate version of 7zip was used to extract a copy of what appeared to be Directory Services Internals (DSInternals) onto the computer. DSInternals is a legitimate tool which can be used for querying Active Directory servers and retrieving data, typically passwords, keys, or password hashes.
+
+An additional tool called mc_store.exe was later installed by the attackers on this computer. The tool is an unknown PyInstaller packaged application. No further activity was observed on this computer.

@@ -1,0 +1,127 @@
+Summary
+
+The IRON TWILIGHT threat group has targeted non-governmental organizations (NGOs), journalists, politicians, political organizations, governments, and militaries since at least 2009. SecureWorks® Counter Threat Unit™ (CTU) researchers assess it is highly likely that IRON TWILIGHT is sponsored by the Russian government. In Spring 2015, the Russian government began tasking IRON TWILIGHT with activity beyond covert intelligence gathering. The group conducted a sabotage operation against France-based TV station TV5Monde and leaked political details in what U.S. intelligence agencies concluded was an attempt to influence the U.S. presidential election.
+
+Background
+
+Prior to 2015, IRON TWILIGHT (also known as APT28, Pawn Storm, Sofacy, Tsar Team, Strontium, and Fancy Bear) targets were consistent with a government intelligence agency tasked with covertly gathering military intelligence. The group has targeted military officials, including those from North Atlantic Treaty Organization (NATO) member states, and individuals and organizations in Georgia, Germany, Poland, Ukraine, and Denmark. In 2015, there were reports that IRON TWILIGHT had performed credential phishing attacks against Russian political activists, bloggers, and politicians; had targeted U.S. journalists; and had compromised the network of the German Bundestag parliament.
+
+IRON TWILIGHT's toolkit
+
+IRON TWILIGHT has used spearphishing emails with malicious document attachments or links to a custom exploit kit. Its toolset includes malware for Windows, Mac OS X, and Linux-based operating systems and mobile devices. The threat actors also use targeted phishing campaigns to steal webmail credentials.
+
+Email credential theft
+
+IRON TWILIGHT's email credential targeting system allows the threat group to target and exploit accounts for webmail services such as Gmail and Hotmail, as well as corporate email platforms that use webmail interfaces. Its traditional spearphishing capability can send convincing emails that direct victims to a fake login interface that mimics the targeted email system (see Figure 1). As IRON TWILIGHT operates this capability at scale, automation likely accesses and exfiltrates data from compromised accounts. When targeting email services that provide alternate methods to authenticate account access, such as Gmail's use of OAuth, the threat actors may abuse this feature to maintain a persistent session with the compromised account.
+
+
+
+Figure 1. Spoofed Portuguese Army webmail portal in March 2015. (Source: SecureWorks)
+
+Exploit kits
+
+IRON TWILIGHT operates two custom exploit kits. The Sednit exploit kit was used in spearphishing campaigns and strategic web compromises. In 2016, the threat group began using DealersChoice, a hybrid client/server exploit kit. DealersChoice was initially deployed as malware via an attachment to a spearphishing email. The malware profiles the target system and sends the results to a server-side component, which returns the appropriate exploit to compromise the target.
+
+First-stage malware
+
+IRON TWILIGHT uses a succession of first-stage malware to establish access to a target environment, perform reconnaissance, and facilitate installation of second-stage tools. In 2016, the threat group deployed the Seduploader malware, which is based on the Carberp trojan, and the Downdelph Delphi-based malware. The group also used the Coreshell malware, a Sofacy malware variant.
+
+Second-stage tools
+
+To fully exploit a target environment, IRON TWILIGHT used the XAgent (also known as Chopstick) modular remote access trojan (RAT) and the XTunnel persistent backchannel tool. XAgent can jump air-gapped networks by infecting USB storage devices and can be used against Windows and Unix-based operating systems. XAgent variants such as Komplex provide RAT functionality on the Mac OS X operating system, and the threat group maintains variants that operate on Apple iOS and the Google Android mobile operating systems. XTunnel provides IRON TWILIGHT with secure access to a compromised environment though a back connection created by the malware to a command and control (C2) server.
+
+Endpoint tools
+
+The threat group uses an endpoint kit named Scaramouche that consists of screen capture and credential theft tools. CTU™ researchers named the malware after the Scaramouche username found in the PDB path of both tools.
+
+IRON TWILIGHT activity between mid-2015 and
+
+late-2016
+
+IRON TWILIGHT's overt, albeit deniable, activity in 2015 and 2016 distinguishes it from the traditional covert operations of other Russian government threat groups.
+
+Gmail phishing
+
+In June 2015, CTU researchers began tracking an IRON TWILIGHT phishing campaign targeting Gmail accounts (see Figure 2). The tracking involved monitoring the threat group's use of the Bitly link-shortening service. CTU researchers discovered that thousands of Gmail users had been targeted since at least March 2015, including individuals in Russia and the former Soviet states, current and former military and government personnel, military and government organizations in the U.S. and Europe, and authors and journalists with an interest in Russia.
+
+
+
+Figure 2. IRON TWILIGHT spearphishing email targeting a Gmail user. (Source: The Smoking Gun)
+
+TV5Monde attack
+
+On April 8, 2015, French TV station TV5Monde was taken off air by a destructive cyber operation claimed in the name of the 'CyberCaliphate' (see Figure 3). Threat actors compromised the station's broadcast network, and it took 24 hours for TV5Monde to fully restore its service. In June 2015, French police announced that IRON TWILIGHT was responsible for the attack and had used the CyberCaliphate as a false flag for its operation.
+
+
+
+Figure 3. CyberCaliphate message left on TV5Monde's Facebook page. (Source: Los Angeles Times)
+
+The motive behind this attack is unclear. It could have been an attempt to increase French citizens' fear of terrorism; in particular, the heightened ISIS and Al-Qaeda threats following the January 2015 Charlie Hebdo shootings. Alternatively, IRON TWILIGHT could have been testing its capability in a live environment, complete with a false-flag operation.
+
+UK television station compromise
+
+In July 2015, IRON TWILIGHT compromised an email server on a UK TV station's network. Using this initial foothold, the threat group expanded its control across the network in November and December 2015, installing the Winexe and Remcom open-source remote command execution tools on a domain controller. Winexe runs on GNU and Linux systems, Remcom runs on Windows systems, and both tools are used to administer Windows systems. IRON TWILIGHT also used Winexe during its 2015 operation against the Bundestag.
+
+In December 2015, IRON TWILIGHT used Winexe to interact with eight workstations and one server. The threat actors installed XTunnel and Coreshell on a compromised server that provided a bridge between the TV station's corporate and broadcast networks. They also installed XTunnel on two workstations, likely to provide redundant access to the targeted network. This first phase could represent IRON TWILIGHT's reconnaissance of the TV station's network. Installation of Coreshell on a bridge server suggests the threat actors may have considered data on that system to be of interest or considered the server to be a key component to achieving their goals. The compromised server's connection between the TV station's back office and broadcast networks gave IRON TWILIGHT access to the broadcast network, although CTU researchers have no evidence that the threat actors exploited this potential. The second phase began on December 10 and focused on the TV station director's system and a system located in the station's production control room. On both systems, IRON TWILIGHT installed a custom screenshot capture tool that is part of its Scaramouche toolkit.
+
+CTU researchers observed minimal IRON TWILIGHT activity on the television station's network in 2016. The only significant activity occurred in May. At the beginning of the month, the threat group surveyed a few Windows workstations, and then in mid-May IRON TWILIGHT operators installed XTunnel as a Coreshell child process on an already compromised system. Evidence indicates that the threat actors aimed to compromise and maintain access to the television station's network, possibly to position themselves for future operational activity. The capability and access they established on the compromised network allowed them to quickly download new tools and exfiltrate data. The threat group was evicted from the network in September 2016.
+
+Flight MH17 information gathering
+
+On October 14, 2015, the Dutch Safety Board published a report on the July 2014 crash of flight MH17 in Eastern Ukraine. The report concluded that a Buk surface-to-air missile system was used to shoot down the aircraft, a narrative rejected by the Russian government. In late October, IRON TWILIGHT targeted the Dutch Safety Board with a phishing campaign aimed at stealing email credentials. A similar IRON TWILIGHT operation targeted Bellingcat, a UK-based citizen journalist group. Bellingcat published articles stating that the Buk missile system used to shoot down flight MH17 was brought into Ukraine from Russia. In both incidents, the threat group's goal appeared to be acquiring intelligence that could be potentially embarrassing to the Russian government.
+
+DNC and Hillary Clinton campaign compromises
+
+Between March and May 2016, CTU researchers monitoring IRON TWILIGHT's targeting of organizational and personal Gmail accounts uncovered phishing emails targeting nine DNC accounts, 108 Hillary Clinton presidential campaign accounts, and at least 26 personal accounts belonging to individuals active in U.S. politics. In June 2016, the DNC confirmed its network was compromised by IRON TWILIGHT.
+
+Shortly after that confirmation, an entity using the name ‘Guccifer 2.0' released documents obtained from the DNC intrusion (see Figure 4). Guccifer 2.0 claimed to be a Romanian hacker responsible for the DNC breach, but analysis of the leaked material cast doubt on this claim. The WikiLeaks-like DCLeaks website also released internal DNC documents in a separate incident. CTU researchers and other researchers assessed that the Guccifer 2.0 persona and the DCLeaks website were created by IRON TWILIGHT to divert attention from the actual origin of the leaked material.
+
+
+
+Figure 4. Guccifer 2.0's website claiming responsibility for the compromise of the DNC's network. (Source: SecureWorks)
+
+WADA retaliation
+
+In July 2016, the World Anti-Doping Agency (WADA) released a report accusing the Russian government of running a sports doping program. As a result, many Russian athletes were banned from the Rio Olympics and all Russian competitors were banned from the Rio Paralympics. In August 2016, WADA reported it had been a victim of a credential phishing attack. CTU researchers uncovered similar activity against the Court of Arbitration in Sport, which had ruled in favor of the Russian ban. The CTU research team, WADA, and other researchers linked both attacks to IRON TWILIGHT.
+
+In September 2016, the “Fancy Bears' Hack Team,” whose name seems to reference CrowdStrike's name for IRON TWILIGHT (Fancy Bear), leaked medical records of prominent Western athletes (see Figure 5). These records were stolen from WADA's Anti-Doping Administration & Management System (ADAMS) database and detailed Therapeutic Use Exemptions (TUEs), which are instances permitting athletes to receive banned substances for medical reasons. The leak implied that Western athletes abused this provision and that WADA's criticism of Russia was hypocritical.
+
+
+
+Figure 5. Fancy Bears' Hack Team website. (Source: SecureWorks)
+
+WikiLeaks email leaks
+
+In early October 2016, WikiLeaks published emails stolen from John Podesta, the then-chairman of the Hillary Clinton presidential campaign. CTU research demonstrated that IRON TWILIGHT targeted Podesta's email account in March 2016, which was the likely source of WikiLeaks' data. IRON TWILIGHT used WikiLeaks to hide its involvement in the Podesta Gmail account compromise.
+
+GRU connection
+
+Russia's Main Intelligence Directorate (GRU), the military foreign intelligence agency, is tasked with producing military intelligence for the Russian government and in support of Russian military operations. It also gathers political intelligence and conducts covert paramilitary operations. Consequently, it plays a key role in supporting Russia's military activity in Ukraine and Syria. The GRU is deeply involved in Russian covert military operations, particularly in the use of maskirovka (using deception and disinformation to confuse, undermine, and ultimately disrupt an enemy). This tactic was employed during the Russian annexation of the Crimea region of Ukraine, and was reportedly used against Western countries.
+
+Some researchers have suggested that IRON TWILIGHT is part of the GRU. CTU analysis of IRON TWILIGHT's targeting strategy supports this assessment, but there is no direct evidence. Most of the Gmail users targeted in IRON TWILIGHT's 2015 spearphishing campaign appeared to be associated with Russian military interests, including an email address linked to a spokesperson for the Ukrainian prime minister and accounts belonging to opposition fighters in the Syrian civil war. Excluding email accounts associated with former Soviet countries, 41% of the targeted accounts belonged to military personnel or organizations (see Figure 6). This category includes military attachés attached to European embassies. This targeting aligns with the GRU's goals.
+
+
+
+Figure 6. Non-Russian or Soviet Gmail accounts targeted in IRON TWILIGHT's 2015 spearphishing campaign. (Source: SecureWorks)
+
+Although IRON TWILIGHT became known for political targeting in 2016, evidence strongly indicates its main focus has always been gathering military intelligence to support current Russian military operations and acquiring intelligence of strategic threats. For example, documents used in a spearphishing campaign in late 2016 target NATO military personnel (see Figure 7). Russia considers NATO a strategic threat. IRON TWILIGHT's targeting of foreign military personnel and regions where Russia is militarily active matches what CTU researchers expect from the GRU, given its remit to gather intelligence for the Russian military. Therefore, CTU researchers assess IRON TWILIGHT is probably sponsored by, or an operational function of, the GRU.
+
+
+
+Figure 7. IRON TWILIGHT spearphishing document targeted NATO personnel in late 2016. (Source: SecureWorks)
+
+Conclusion
+
+In 2015 and 2016, the Russian government used IRON TWILIGHT to target a variety of organizations. The threat group's activity can be characterized by the theft of confidential information and its calculated release to influence global events. Characteristics of IRON TWILIGHT's activity suggest it is operated by the GRU. The threat group's departure from purely military and regional affairs to broader political and strategic operations, evidenced by its U.S. political operations, suggests the Kremlin views IRON TWILIGHT's role as supporting Russian ‘active measures.' These active measures correspond to the Soviet doctrine of manipulating popular opinion to align with Russian strategic interests, enabling other Russian threat groups to carry out traditional covert intelligence gathering operations.
+
+If IRON TWILIGHT's ‘active measures' operations in 2016 were intended to influence the U.S. presidential elections, then CTU researchers expect similar operations against elections of strategic interest to the Russian government. These elections include the French presidential and German federal elections in 2017. The operations against TV5 Monde and the UK-based television network could indicate that the Russian government considers the disruption of foreign television broadcasts as a key capability. Therefore, IRON TWILIGHT should be considered a threat to broadcast media organizations. Attacks against the Dutch Safety Board and WADA demonstrate that IRON TWILIGHT will attempt to compromise and embarrass any organization that takes a position that the Russian government views as hostile.
+
+IRON TWILIGHT is opportunistic but less sophisticated than other Russian threat groups. By applying best practice security controls such as regular vulnerability scanning and patching, network monitoring, and user education, organizations can reduce their susceptibility to compromise. IRON TWILIGHT quickly operationalizes disclosed vulnerabilities in web browsers and associated plugins, so timely implementation of patches is important for protecting systems. Based on the threat group's exploitation of webmail, CTU researchers recommend that organizations implement two-factor authentication (2FA) on internal or third-party webmail platforms used in their environments. Organizations should also encourage employees use 2FA on their personal accounts and restrict work-related communication from personal email.
+
+References
+
+Alperovitch, Dmitri. "Bears in the Midst: Intrusion into the Democratic National Committee." CrowdStrike. June 15, 2016. https://www.crowdstrike.com/blog/bears-midst-intrusion-democratic-national-committee/ BBC News. "TV5 Monde attack 'by Russia-based hackers.'" June 9, 2015. http://www.bbc.co.uk/news/world-europe-33072034 Dutch Safety Board. "Dutch Safety Board: Buk surface-to-air missile system caused MH17 crash." October 13, 2015. https://www.onderzoeksraad.nl/en/onderzoek/2049/investigation-crash-mh17-17-july-2014/publicatie/1658/dutch-safety-board-buk-surface-to-air-missile-system-caused-mh17-crash Euronews. "Russia rejects reporting into downing of MH17 as 'biased.'" September 29, 2016. http://www.euronews.com/2016/09/29/russia-rejects-report-into-downing-of-mh17-as-biased Franceschi-Bicchierai, Lorenzo. "‘Guccifer 2.0' Is Likely a Russian Government Attempt to Cover Up Its Own Hack." Motherboard. June 16, 2016. http://motherboard.vice.com/read/guccifer-20-is-likely-a-russian-government-attempt-to-cover-up-their-own-hack Franceschi-Bicchierai, Lorenzo. "How Hackers Broke into John Podesta and Colin Powell's Gmail Accounts." Motherboard. October 20, 2016. http://motherboard.vice.com/read/how-hackers-broke-into-john-podesta-and-colin-powells-gmail-accounts Galeotti, Mark. "Putin's Hydra: Inside Russia's Intelligence Services." European Council of Foreign Relations. May 2016. http://www.ecfr.eu/page/-/ECFR_169_-_PUTINS_HYDRA_INSIDE_THE_RUSSIAN_INTELLIGENCE_SERVICES_1513.pdf Guarnieri, Claudio. "Digital Attack on German Parliament: Investigative Report on the Hack of the Left Party Infrastructure in Bundestag." June 19, 2015. Netzpolitik.org. https://netzpolitik.org/2015/digital-attack-on-german-parliament-investigative-report-on-the-hack-of-the-left-party-infrastructure-in-bundestag/ Hacquebord, Feike. "Operation Pawn Storm Ramps Up its Activities; Targets NATO, White House." Trend Micro. April 16, 2015. http://blog.trendmicro.com/trendlabs-security-intelligence/operation-pawn-storm-ramps-up-its-activities-targets-nato-white-house/ Hacquebord, Feike. "Pawn Storm's Domestic Spying Campaign Revealed; Ukraine and US Top Global Targets" Trend Micro. August 18, 2015. http://blog.trendmicro.com/trendlabs-security-intelligence/pawn-storms-domestic-spying-campaign-revealed-ukraine-and-us-top-global-targets/ Hacquebord, Feike. "Pawn Storm Targets MH17 Investigation Team." Trend Micro. October 22, 2015. http://blog.trendmicro.com/trendlabs-security-intelligence/pawn-storm-targets-mh17-investigation-team/ Henley, Jon. "Russia waging information war against Sweden, study finds." The Guardian. January 11, 2017. https://www.theguardian.com/world/2017/jan/11/russia-waging-information-war-in-sweden-study-finds Kharouni, Loucif, et al. "Operation Pawn Storm Using Decoys to Evade Detection." Trend Micro. 2014. http://www.trendmicro.com/cloud-content/us/pdfs/security-intelligence/white-papers/wp-operation-pawn-storm.pdf Moore, Alan. "Hypocrisy takes gold in world of sports." RT. December 17, 2016. https://www.rt.com/op-edge/370633-alan/ Pike, John. "Operations of the Main Intelligence Administration (GRU)." Federation of American Scientists. November 26, 1997. https://fas.org/irp/world/russia/gru/ops.htm Riach, James. "The Fancy Bears leaks shouldn't tar all athletes with the same doping brush." The Guardian. September 21, 2016. https://www.theguardian.com/commentisfree/2016/sep/21/fancy-bears-leaks-athletes-doping-russia-cyber-hackers SecureWorks. "Threat Group-4127 Targets Hillary Clinton Presidential Campaign." June 16, 2016. https://www.secureworks.com/research/threat-group-4127-targets-hillary-clinton-presidential-campaign SecurityWeek. "France TV Cyberattack Probe Focused on 'Russian Hackers.'" June 9, 2015. http://www.securityweek.com/france-tv-cyberattack-probe-focused-russian-hackers ThreatConnect. "Russian Cyber Operations on Steroids." August 19, 2016. https://www.threatconnect.com/blog/fancy-bear-anti-doping-agency-phishing/ ThreatConnect. "Belling the BEAR." September 28, 2016. https://www.threatconnect.com/blog/russia-hacks-bellingcat-mh17-investigation/ Uchill, John. "Guccifer 2.0 releases new DNC docs." The Hill. July 13, 2016. http://thehill.com/policy/cybersecurity/287558-guccifer-20-drops-new-dnc-docs United States Senate Committee on Armed Services. "McCain, Graham, Schumer, Reed Joint Statement on Reports That Russia Interfered with the 2016 Election." December 11, 2016. http://www.armed-services.senate.gov/press-releases/mccain-graham-schumer-reed-joint-statement-on-reports-that-russia-interfered-with-the-2016-election World Anti-Doping Agency. "WADA Confirms Attack by Russian Cyber Espionage Group." September 13, 2016. https://www.wada-ama.org/en/media/news/2016-09/wada-confirms-attack-by-russian-cyber-espionage-group World Anti-Doping Agency. "WADA confirms illegal activity on Yuliya Stepanova's ADAMS account." August 13, 2016. https://www.wada-ama.org/en/media/news/2016-08/wada-confirms-illegal-activity-on-yuliya-stepanovas-adams-account World Anti-Doping Agency. "WADA publishes Independent McLaren Investigations Report." July 18, 2016. https://www.wada-ama.org/en/media/news/2016-07/wada-publishes-independent-mclaren-investigations-report
+
+Appendix — Identifying attribution
+
+In most cases, CTU researchers do not have intelligence to directly attribute a threat group, so attribution relies on circumstantial evidence and is an assessment rather than a fact. CTU researchers draw on three distinct intelligence bases for evidence of attribution:

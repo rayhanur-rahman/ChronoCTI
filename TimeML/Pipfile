@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+six = "*"
+future = "*"
+spacy = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+benepar = "*"
+tqdm = "*"
+flask = "*"
+spacy-transformers = "*"
+
+[dev-packages]
+autopep8 = "*"
+
+[requires]
+python_version = "3.11"

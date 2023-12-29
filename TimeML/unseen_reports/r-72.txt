@@ -1,0 +1,4 @@
+About ThreatExpert™
+
+ThreatExpert is an advanced automated threat analysis system designed to analyze and report the behavior of computer viruses, worms, trojans, adware, spyware, and other security-related risks in a fully automated mode.
+

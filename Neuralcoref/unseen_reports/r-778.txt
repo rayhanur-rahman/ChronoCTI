@@ -1,0 +1,5 @@
+FortiGuard Labs has found a new plugin named networkDLL that is being distributed to the victims of the Trickbot Trojan. This new plugin is similar to the old DomainGrabber plugin discovered late last year in that they both try to collect information about the victim’s network. In fact, we have observed the same functions being used by both plugins.
+
+The key difference between these two plugins lies in the type of information they gather. In the past, DomainGrabber focused on obtaining domain credentials and configurations from domain controllers by accessing shared SYSVOL files. networkDLL, on the other hand, focuses on mapping out the victim’s network and getting to know more about the victim’s local system. Which means that it’s essentially a reconnaissance stage plugin, which is very common with multi-staged APT (Advanced Persistent Threat) attacks. In this stage, threat actors gather as much information as they can to determine what type of follow-on attacks are appropriate for the targeted system.
+
+As is common with Trickbot plugins, networkDLL does not have any obfuscations, as can be seen in the following image of the library’s main routine:

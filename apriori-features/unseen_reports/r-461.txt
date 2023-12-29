@@ -1,0 +1,59 @@
+The tool is used to hide the threat actors’ tools and services. The tool’s configuration was added to registry run keys on a victim’s computer.
+
+Hidden Registry/Folder/File
+
+Type Value REG HKLM\SYSTEM\CurrentControlSet\services\HiddenService REG HKLM\SYSTEM\CurrentControlSet\services\servTest REG HKLM\SYSTEM\CurrentControlSet\services\TrkWkss Folder C:\programdata\vlc File C:\programdata\vlc\vlc.exe Folder C:\programdata\test File C:\programdata\test\dlpumgr32.exe File C:\windows\system32\drivers\Hidden.sys File C:\windows\system32\HiddenService.exe
+
+Table 5. The tool’s configuration
+
+The references to “Hidden” are related to the rootkit itself. The “dlpumgr32.exe” and “servTest” lines are related to the new version of SysUpdate which we described earlier.
+
+
+
+We do not know which malware variant is being sideloaded by vlc.exe. It is probably installed as a service named “TrkWkss.” We found a SysUpdate sample compiled in November 2020 that abuses a DLL sideloading vulnerability in VLC (see IOC list). This confirms that this threat actor is abusing this legitimate program to sideload its backdoors.
+
+HyperBro Malware Family
+
+The Iron Tiger APT group has used the HyperBro malware family since at least 2017. It is the evolved version of HttpBrowser, which the group has been using since at least 2015.
+
+We found earlier versions of this malware that were sideloaded by malicious DLL files that unpacked and loaded a binary file named “thumb.db” in memory. All the requests were sent to the C&C server on port 443, with “/ajax” as the uniform resource identifier (URI).
+
+While investigating Operation DRBControl, we found an updated version of this malware family that implements some new classes. We provided a detailed analysis of this new HyperBro version in our research.
+
+We also discovered that the binary file that’s being unpacked and loaded in memory by malicious DLL files is named “thumb.dat.” We also saw that all requests sent to the C&C server were sent to the URI “/api/v2/ajax” on port 443.
+
+Since we analyzed that single sample, we found several new samples that matched the newer behavior, some of which have been deployed in our gambling target.
+
+However, we continue seeing samples that feature the “older” behaviors, which suggests that different groups — or possibly subgroups of Iron Tiger — are using this malware family. Some of these samples match the target and behavior listed by ESET in their blog.
+
+FRP Tool
+
+We found the FRP tool being used on a Linux host, which is similar to Avast’s findings in a report that they published on the Iron Tiger threat actor.
+
+The FRP tool that we analyzed was a modified version, which was possibly copied off of Github.
+
+Type 1 Malware Family
+
+We found three new samples of the Type 1 malware family that abuses Dropbox as a secondary C&C channel, which we described in our Operation DRBControl whitepaper.
+
+Apart from a modification in the malware sample’s configuration (which happened after we published our paper), the differences with the versions that we analyzed in 2019 are minor. The version numbering was at 11.0, while the last sample we analyzed in August 2019 was at version number 9.0. This shows that the development is still active.
+
+On the infrastructure side, we observed that the threat actor switched from using IP addresses hosted on the Google Cloud Platform (GCP) to IP addresses hosted on Microsoft Azure.
+
+It should be noted that after our blog publication in February 2020, the threat actor compiled new Type 1 malware samples using a new configuration, which prevented us from closely monitoring their operations. We believe that this was a direct reaction to our research, suggesting that the threat actor read our investigation.
+
+It’s also important to note that the compilation timestamp of the sideloaded DLLs were set a few months in advance. For example, the binaries that we found in March and April 2020 had an August 26, 2020 compilation date. This is consistent with the behavior that we noticed during Operation DRBControl, wherein some binaries that have been found in mid-2019 had a compilation date of March 4, 2020. This shows that the threat actors intended to confuse forensics investigators with incorrect timestamps, which is why it’s critical to analyze timestamps with caution during investigations.
+
+Infection Vector
+
+We could not confirm the primary infection vector. However, traces of the exploitation of the Microsoft Exchange vulnerability CVE-2020-0688 were found.
+
+Multiple infection vectors have been attributed to this threat actor in the past:
+
+During our investigation, we found some old samples that fit in these categories but have not been reported. They are unrelated to this campaign and can be found in our IOC list.
+
+Targets
+
+The closer look into Iron Tiger was prompted because of an incident response investigation involving a Philippine-based gambling company that the group targeted. True to form, the Iron Tiger threat actor has targeted the same company for 18 months.
+
+Aside from targeting the same company, Iron Tiger also targeted other countries and industries. Over the past 18 months, we observed how the group targeted governments, banks, telecommunication providers, and even the energy sector in the Middle East and Southeast Asia.

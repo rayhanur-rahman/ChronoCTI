@@ -1,0 +1,7 @@
+OceanLotus was responsible for targeted attacks against organizations from industries such as media, research, and construction. Recently they have also been discovered by researchers from Volexity to be using malicious websites to propagate malware.
+
+The attackers behind this sample are suspected to target users from Vietnam since the document’s name is in Vietnamese and the older samples targeted the same region before.
+
+Arrival
+
+The sample arrives as an app bundled in a Zip archive. It uses the icon for a Word document file as a disguise, attempting to pass itself off as a legitimate document file.

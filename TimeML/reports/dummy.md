@@ -1,0 +1,1 @@
+Ray goes to NCSU for studying CS and then he goes to Lake Johnson for running

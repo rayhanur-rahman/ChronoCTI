@@ -1,0 +1,29 @@
+This included the Fuzzbunch framework that was part of an infamous leak of exploits and tools by the Shadow Brokers in April 2017. Leafminer has developed exploit payloads for this framework (Table 2) that deliver custom malware through attacks against SMB vulnerabilities described by Microsoft. The EternalBlue exploit from the framework received worldwide attention after being used in the ransomware campaigns WannaCry in May and Petya/NotPetya in June 2017. The Leafminer operators use EternalBlue to attempt lateral movement within target networks from compromised staging servers.
+
+Symantec also observed attempts by Leafminer to scan for the Heartbleed vulnerability (CVE-2014-0160) from an attacker-controlled IP address. Furthermore, the Leafminer arsenal server hosted a Python script to scan for this vulnerability.
+
+Dictionary attacks
+
+Another intrusion approach used by Leafminer seems a lot less sophisticated than the previously described methods but can be just as effective: using specific hacktools to guess the login passwords for services exposed by a targeted system. This type of attack was observed both via dedicated servers set up by Leafminer as well as staging servers compromised by the group.
+
+Commands found in a readme text that was stored in a ZIP archive together with the hacktool THC Hydra in Leafminer’s tool arsenal represent online dictionary attacks on Microsoft Exchange and Remote Desktop Protocol services of regional government servers in Saudi Arabia. "Online" in this case refers to the attacker using the protocol of the targeted network service to quickly run through many password guesses.
+
+Custom malware
+
+Symantec identified two strains of custom malware used by the Leafminer group: Trojan.Imecab and Backdoor.Sorgu. Directly connected to this malware are several sets of reflective loader DLLs used as droppers or to execute specific commands on a compromised system.
+
+The development of custom malware by Leafminer as well as some of the tools used for lateral movement show a preference for the .NET framework. We also observed that the attackers would download and install the .NET framework on compromised machines, supposedly in the situation that an operator would have remote access to the system but required .NET to run Leafminer's custom tools. To this end, the command and control (C&C) server operated by the group hosted the legitimate setup executable for Microsoft .NET Framework 2.0 SP2.
+
+Backdoor.Sorgu
+
+Backdoor.Sorgu is used by the attackers to provide remote access to the infected machine. The backdoor is installed as a service in the Windows system through a shell command script.
+
+Trojan.Imecab
+
+The purpose of Trojan.Imecab is to set up a persistent remote access account on the target machine with a hardcoded password. Variants of the malware were also observed with the filename guester.exe which likely refers to the functionality of adding a powerful guest account to the system.
+
+The malware installs itself in the system as a Windows service to achieve persistence and ensure that the guest account remains available to the attacker.
+
+Reflective loader DLLs
+
+Table 2 gives an overview of the reflective loader DLLs and their purpose:

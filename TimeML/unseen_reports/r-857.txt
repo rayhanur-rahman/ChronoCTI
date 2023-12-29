@@ -1,0 +1,13 @@
+Right as July of this year began, we noticed an emerging malware dubbed by most as ThiefQuest (also known as EvilQuest), a threat that targets macOS devices, encrypts files, and installs keyloggers in affected systems. It has been found in pirated versions of macOS shared on popular torrent sites. Developments on the malware have been reported by MalwareBytes, BleepingComputer and security researchers Dinesh Devadoss, Phil Stokes, Patrick Wardle, and Thomas Reed.
+
+The aforementioned reports state the assumption that the malware’s ransomware activity is not its main attack method; rather, it is a pre-emptive move to disguise its other capabilities such as file exfiltration, Command and Control (C&C) communication, and keylogging. This assumption is also supported by our recent discoveries.
+
+Given that both the previously mentioned researchers and the updated report from Objective-See have conducted an in-depth look into the malware, in this blog post we will discuss our own discoveries such as the differences between the old and new versions of the malware, including unusual observations in VirusTotal. More importantly, we’d like to add to the current information provided by published reports that prove our belief that ThiefQuest is an example of highly capable malware that should be kept under close monitoring.
+
+New ThiefQuest variants
+
+New functions
+
+Besides the old ThiefQuest variant that has been reported by various researchers, we also discovered some improved variants with stronger capabilities and other changes compared with earlier iterations of the malware. For instance, these new variants seem to emerge only days after the detection of older variants. Notably, previously encountered ransomware behavior, such as file encryption and ransom note dropping, have been removed.
+
+These new updates are not called by the main code of the malware, and through further investigation, we discovered that the authors have implemented a new routine for computing and calling the new functions’ addresses. Other versions of these new variants have even obfuscated the function names to make malware tracing more difficult.

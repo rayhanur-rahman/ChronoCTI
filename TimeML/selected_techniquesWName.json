@@ -1,0 +1,722 @@
+[
+    {
+        "id": "T1106",
+        "name": "Native API",
+        "title": "T1106: Native API",
+        "count": 365
+    },
+    {
+        "id": "T1055",
+        "name": "Process Injection",
+        "title": "T1055: Process Injection",
+        "count": 296
+    },
+    {
+        "id": "T1218",
+        "name": "System Binary Proxy Execution",
+        "title": "T1218: System Binary Proxy Execution",
+        "count": 245
+    },
+    {
+        "id": "T1053",
+        "name": "Scheduled Task/Job",
+        "title": "T1053: Scheduled Task/Job",
+        "count": 254
+    },
+    {
+        "id": "T1056",
+        "name": "Input Capture",
+        "title": "T1056: Input Capture",
+        "count": 251
+    },
+    {
+        "id": "T1059",
+        "name": "Command and Scripting Interpreter",
+        "title": "T1059: Command and Scripting Interpreter",
+        "count": 1851
+    },
+    {
+        "id": "T1547",
+        "name": "Boot or Logon Autostart Execution",
+        "title": "T1547: Boot or Logon Autostart Execution",
+        "count": 409
+    },
+    {
+        "id": "T1036",
+        "name": "Masquerading",
+        "title": "T1036: Masquerading",
+        "count": 556
+    },
+    {
+        "id": "T1070",
+        "name": "Indicator Removal",
+        "title": "T1070: Indicator Removal",
+        "count": 473
+    },
+    {
+        "id": "T1574",
+        "name": "Hijack Execution Flow",
+        "title": "T1574: Hijack Execution Flow",
+        "count": 136
+    },
+    {
+        "id": "T1546",
+        "name": "Event Triggered Execution",
+        "title": "T1546: Event Triggered Execution",
+        "count": 171
+    },
+    {
+        "id": "T1133",
+        "name": "External Remote Services",
+        "title": "T1133: External Remote Services",
+        "count": 124
+    },
+    {
+        "id": "T1021",
+        "name": "Remote Services",
+        "title": "T1021: Remote Services",
+        "count": 261
+    },
+    {
+        "id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "title": "T1105: Ingress Tool Transfer",
+        "count": 976
+    },
+    {
+        "id": "T1586",
+        "name": "Compromise Accounts",
+        "title": "T1586: Compromise Accounts",
+        "count": 61
+    },
+    {
+        "id": "T1078",
+        "name": "Valid Accounts",
+        "title": "T1078: Valid Accounts",
+        "count": 136
+    },
+    {
+        "id": "T1090",
+        "name": "Proxy",
+        "title": "T1090: Proxy",
+        "count": 139
+    },
+    {
+        "id": "T1221",
+        "name": "Template Injection",
+        "title": "T1221: Template Injection",
+        "count": 21
+    },
+    {
+        "id": "T1204",
+        "name": "User Execution",
+        "title": "T1204: User Execution",
+        "count": 324
+    },
+    {
+        "id": "T1136",
+        "name": "Create Account",
+        "title": "T1136: Create Account",
+        "count": 49
+    },
+    {
+        "id": "T1548",
+        "name": "Abuse Elevation Control Mechanism",
+        "title": "T1548: Abuse Elevation Control Mechanism",
+        "count": 74
+    },
+    {
+        "id": "T1134",
+        "name": "Access Token Manipulation",
+        "title": "T1134: Access Token Manipulation",
+        "count": 67
+    },
+    {
+        "id": "T1037",
+        "name": "Boot or Logon Initialization Scripts",
+        "title": "T1037: Boot or Logon Initialization Scripts",
+        "count": 20
+    },
+    {
+        "id": "T1124",
+        "name": "System Time Discovery",
+        "title": "T1124: System Time Discovery",
+        "count": 119
+    },
+    {
+        "id": "T1529",
+        "name": "System Shutdown/Reboot",
+        "title": "T1529: System Shutdown/Reboot",
+        "count": 21
+    },
+    {
+        "id": "T1559",
+        "name": "Inter-Process Communication",
+        "title": "T1559: Inter-Process Communication",
+        "count": 79
+    },
+    {
+        "id": "T1570",
+        "name": "Lateral Tool Transfer",
+        "title": "T1570: Lateral Tool Transfer",
+        "count": 65
+    },
+    {
+        "id": "T1135",
+        "name": "Network Share Discovery",
+        "title": "T1135: Network Share Discovery",
+        "count": 57
+    },
+    {
+        "id": "T1095",
+        "name": "Non-Application Layer Protocol",
+        "title": "T1095: Non-Application Layer Protocol",
+        "count": 84
+    },
+    {
+        "id": "T1005",
+        "name": "Data from Local System",
+        "title": "T1005: Data from Local System",
+        "count": 457
+    },
+    {
+        "id": "T1560",
+        "name": "Archive Collected Data",
+        "title": "T1560: Archive Collected Data",
+        "count": 197
+    },
+    {
+        "id": "T1027",
+        "name": "Obfuscated Files or Information",
+        "title": "T1027: Obfuscated Files or Information",
+        "count": 1086
+    },
+    {
+        "id": "T1114",
+        "name": "Email Collection",
+        "title": "T1114: Email Collection",
+        "count": 54
+    },
+    {
+        "id": "T1025",
+        "name": "Data from Removable Media",
+        "title": "T1025: Data from Removable Media",
+        "count": 38
+    },
+    {
+        "id": "T1003",
+        "name": "OS Credential Dumping",
+        "title": "T1003: OS Credential Dumping",
+        "count": 219
+    },
+    {
+        "id": "T1074",
+        "name": "Data Staged",
+        "title": "T1074: Data Staged",
+        "count": 175
+    },
+    {
+        "id": "T1219",
+        "name": "Remote Access Software",
+        "title": "T1219: Remote Access Software",
+        "count": 63
+    },
+    {
+        "id": "T1047",
+        "name": "Windows Management Instrumentation",
+        "title": "T1047: Windows Management Instrumentation",
+        "count": 202
+    },
+    {
+        "id": "T1057",
+        "name": "Process Discovery",
+        "title": "T1057: Process Discovery",
+        "count": 325
+    },
+    {
+        "id": "T1087",
+        "name": "Account Discovery",
+        "title": "T1087: Account Discovery",
+        "count": 365
+    },
+    {
+        "id": "T1018",
+        "name": "Remote System Discovery",
+        "title": "T1018: Remote System Discovery",
+        "count": 101
+    },
+    {
+        "id": "T1082",
+        "name": "System Information Discovery",
+        "title": "T1082: System Information Discovery",
+        "count": 558
+    },
+    {
+        "id": "T1069",
+        "name": "Permission Groups Discovery",
+        "title": "T1069: Permission Groups Discovery",
+        "count": 89
+    },
+    {
+        "id": "T1016",
+        "name": "System Network Configuration Discovery",
+        "title": "T1016: System Network Configuration Discovery",
+        "count": 398
+    },
+    {
+        "id": "T1566",
+        "name": "Phishing",
+        "title": "T1566: Phishing",
+        "count": 492
+    },
+    {
+        "id": "T1497",
+        "name": "Virtualization/Sandbox Evasion",
+        "title": "T1497: Virtualization/Sandbox Evasion",
+        "count": 138
+    },
+    {
+        "id": "T1518",
+        "name": "Software Discovery",
+        "title": "T1518: Software Discovery",
+        "count": 273
+    },
+    {
+        "id": "T1049",
+        "name": "System Network Connections Discovery",
+        "title": "T1049: System Network Connections Discovery",
+        "count": 101
+    },
+    {
+        "id": "T1490",
+        "name": "Inhibit System Recovery",
+        "title": "T1490: Inhibit System Recovery",
+        "count": 54
+    },
+    {
+        "id": "T1489",
+        "name": "Service Stop",
+        "title": "T1489: Service Stop",
+        "count": 119
+    },
+    {
+        "id": "T1113",
+        "name": "Screen Capture",
+        "title": "T1113: Screen Capture",
+        "count": 220
+    },
+    {
+        "id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "title": "T1041: Exfiltration Over C2 Channel",
+        "count": 299
+    },
+    {
+        "id": "T1125",
+        "name": "Video Capture",
+        "title": "T1125: Video Capture",
+        "count": 41
+    },
+    {
+        "id": "T1119",
+        "name": "Automated Collection",
+        "title": "T1119: Automated Collection",
+        "count": 58
+    },
+    {
+        "id": "T1115",
+        "name": "Clipboard Data",
+        "title": "T1115: Clipboard Data",
+        "count": 58
+    },
+    {
+        "id": "T1083",
+        "name": "File and Directory Discovery",
+        "title": "T1083: File and Directory Discovery",
+        "count": 490
+    },
+    {
+        "id": "T1564",
+        "name": "Hide Artifacts",
+        "title": "T1564: Hide Artifacts",
+        "count": 180
+    },
+    {
+        "id": "T1010",
+        "name": "Application Window Discovery",
+        "title": "T1010: Application Window Discovery",
+        "count": 58
+    },
+    {
+        "id": "T1543",
+        "name": "Create or Modify System Process",
+        "title": "T1543: Create or Modify System Process",
+        "count": 257
+    },
+    {
+        "id": "T1033",
+        "name": "System Owner/User Discovery",
+        "title": "T1033: System Owner/User Discovery",
+        "count": 350
+    },
+    {
+        "id": "T1071",
+        "name": "Application Layer Protocol",
+        "title": "T1071: Application Layer Protocol",
+        "count": 755
+    },
+    {
+        "id": "T1480",
+        "name": "Execution Guardrails",
+        "title": "T1480: Execution Guardrails",
+        "count": 64
+    },
+    {
+        "id": "T1496",
+        "name": "Resource Hijacking",
+        "title": "T1496: Resource Hijacking",
+        "count": 39
+    },
+    {
+        "id": "T1112",
+        "name": "Modify Registry",
+        "title": "T1112: Modify Registry",
+        "count": 423
+    },
+    {
+        "id": "T1132",
+        "name": "Data Encoding",
+        "title": "T1132: Data Encoding",
+        "count": 172
+    },
+    {
+        "id": "T1001",
+        "name": "Data Obfuscation",
+        "title": "T1001: Data Obfuscation",
+        "count": 56
+    },
+    {
+        "id": "T1573",
+        "name": "Encrypted Channel",
+        "title": "T1573: Encrypted Channel",
+        "count": 281
+    },
+    {
+        "id": "T1572",
+        "name": "Protocol Tunneling",
+        "title": "T1572: Protocol Tunneling",
+        "count": 47
+    },
+    {
+        "id": "T1222",
+        "name": "File and Directory Permissions Modification",
+        "title": "T1222: File and Directory Permissions Modification",
+        "count": 28
+    },
+    {
+        "id": "T1110",
+        "name": "Brute Force",
+        "title": "T1110: Brute Force",
+        "count": 71
+    },
+    {
+        "id": "T1553",
+        "name": "Subvert Trust Controls",
+        "title": "T1553: Subvert Trust Controls",
+        "count": 122
+    },
+    {
+        "id": "T1588",
+        "name": "Obtain Capabilities",
+        "title": "T1588: Obtain Capabilities",
+        "count": 145
+    },
+    {
+        "id": "T1129",
+        "name": "Shared Modules",
+        "title": "T1129: Shared Modules",
+        "count": 38
+    },
+    {
+        "id": "T1620",
+        "name": "Reflective Code Loading",
+        "title": "T1620: Reflective Code Loading",
+        "count": 60
+    },
+    {
+        "id": "T1561",
+        "name": "Disk Wipe",
+        "title": "T1561: Disk Wipe",
+        "count": 26
+    },
+    {
+        "id": "T1485",
+        "name": "Data Destruction",
+        "title": "T1485: Data Destruction",
+        "count": 54
+    },
+    {
+        "id": "T1068",
+        "name": "Exploitation for Privilege Escalation",
+        "title": "T1068: Exploitation for Privilege Escalation",
+        "count": 95
+    },
+    {
+        "id": "T1608",
+        "name": "Stage Capabilities",
+        "title": "T1608: Stage Capabilities",
+        "count": 123
+    },
+    {
+        "id": "T1189",
+        "name": "Drive-by Compromise",
+        "title": "T1189: Drive-by Compromise",
+        "count": 74
+    },
+    {
+        "id": "T1014",
+        "name": "Rootkit",
+        "title": "T1014: Rootkit",
+        "count": 32
+    },
+    {
+        "id": "T1542",
+        "name": "Pre-OS Boot",
+        "title": "T1542: Pre-OS Boot",
+        "count": 26
+    },
+    {
+        "id": "T1587",
+        "name": "Develop Capabilities",
+        "title": "T1587: Develop Capabilities",
+        "count": 85
+    },
+    {
+        "id": "T1123",
+        "name": "Audio Capture",
+        "title": "T1123: Audio Capture",
+        "count": 47
+    },
+    {
+        "id": "T1584",
+        "name": "Compromise Infrastructure",
+        "title": "T1584: Compromise Infrastructure",
+        "count": 28
+    },
+    {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application",
+        "title": "T1190: Exploit Public-Facing Application",
+        "count": 36
+    },
+    {
+        "id": "T1589",
+        "name": "Gather Victim Identity Information",
+        "title": "T1589: Gather Victim Identity Information",
+        "count": 36
+    },
+    {
+        "id": "T1505",
+        "name": "Server Software Component",
+        "title": "T1505: Server Software Component",
+        "count": 107
+    },
+    {
+        "id": "T1539",
+        "name": "Steal Web Session Cookie",
+        "title": "T1539: Steal Web Session Cookie",
+        "count": 20
+    },
+    {
+        "id": "T1185",
+        "name": "Browser Session Hijacking",
+        "title": "T1185: Browser Session Hijacking",
+        "count": 24
+    },
+    {
+        "id": "T1568",
+        "name": "Dynamic Resolution",
+        "title": "T1568: Dynamic Resolution",
+        "count": 42
+    },
+    {
+        "id": "T1008",
+        "name": "Fallback Channels",
+        "title": "T1008: Fallback Channels",
+        "count": 92
+    },
+    {
+        "id": "T1571",
+        "name": "Non-Standard Port",
+        "title": "T1571: Non-Standard Port",
+        "count": 85
+    },
+    {
+        "id": "T1552",
+        "name": "Unsecured Credentials",
+        "title": "T1552: Unsecured Credentials",
+        "count": 71
+    },
+    {
+        "id": "T1555",
+        "name": "Credentials from Password Stores",
+        "title": "T1555: Credentials from Password Stores",
+        "count": 126
+    },
+    {
+        "id": "T1091",
+        "name": "Replication Through Removable Media",
+        "title": "T1091: Replication Through Removable Media",
+        "count": 25
+    },
+    {
+        "id": "T1486",
+        "name": "Data Encrypted for Impact",
+        "title": "T1486: Data Encrypted for Impact",
+        "count": 88
+    },
+    {
+        "id": "T1140",
+        "name": "Deobfuscate/Decode Files or Information",
+        "title": "T1140: Deobfuscate/Decode Files or Information",
+        "count": 405
+    },
+    {
+        "id": "T1562",
+        "name": "Impair Defenses",
+        "title": "T1562: Impair Defenses",
+        "count": 164
+    },
+    {
+        "id": "T1482",
+        "name": "Domain Trust Discovery",
+        "title": "T1482: Domain Trust Discovery",
+        "count": 28
+    },
+    {
+        "id": "T1098",
+        "name": "Account Manipulation",
+        "title": "T1098: Account Manipulation",
+        "count": 37
+    },
+    {
+        "id": "T1569",
+        "name": "System Services",
+        "title": "T1569: System Services",
+        "count": 224
+    },
+    {
+        "id": "T1007",
+        "name": "System Service Discovery",
+        "title": "T1007: System Service Discovery",
+        "count": 79
+    },
+    {
+        "id": "T1622",
+        "name": "Debugger Evasion",
+        "title": "T1622: Debugger Evasion",
+        "count": 21
+    },
+    {
+        "id": "T1012",
+        "name": "Query Registry",
+        "title": "T1012: Query Registry",
+        "count": 134
+    },
+    {
+        "id": "T1203",
+        "name": "Exploitation for Client Execution",
+        "title": "T1203: Exploitation for Client Execution",
+        "count": 126
+    },
+    {
+        "id": "T1120",
+        "name": "Peripheral Device Discovery",
+        "title": "T1120: Peripheral Device Discovery",
+        "count": 53
+    },
+    {
+        "id": "T1020",
+        "name": "Automated Exfiltration",
+        "title": "T1020: Automated Exfiltration",
+        "count": 22
+    },
+    {
+        "id": "T1217",
+        "name": "Browser Bookmark Discovery",
+        "title": "T1217: Browser Bookmark Discovery",
+        "count": 29
+    },
+    {
+        "id": "T1029",
+        "name": "Scheduled Transfer",
+        "title": "T1029: Scheduled Transfer",
+        "count": 21
+    },
+    {
+        "id": "T1595",
+        "name": "Active Scanning",
+        "title": "T1595: Active Scanning",
+        "count": 64
+    },
+    {
+        "id": "T1614",
+        "name": "System Location Discovery",
+        "title": "T1614: System Location Discovery",
+        "count": 54
+    },
+    {
+        "id": "T1585",
+        "name": "Establish Accounts",
+        "title": "T1585: Establish Accounts",
+        "count": 33
+    },
+    {
+        "id": "T1210",
+        "name": "Exploitation of Remote Services",
+        "title": "T1210: Exploitation of Remote Services",
+        "count": 32
+    },
+    {
+        "id": "T1567",
+        "name": "Exfiltration Over Web Service",
+        "title": "T1567: Exfiltration Over Web Service",
+        "count": 39
+    },
+    {
+        "id": "T1048",
+        "name": "Exfiltration Over Alternative Protocol",
+        "title": "T1048: Exfiltration Over Alternative Protocol",
+        "count": 64
+    },
+    {
+        "id": "T1583",
+        "name": "Acquire Infrastructure",
+        "title": "T1583: Acquire Infrastructure",
+        "count": 58
+    },
+    {
+        "id": "T1550",
+        "name": "Use Alternate Authentication Material",
+        "title": "T1550: Use Alternate Authentication Material",
+        "count": 44
+    },
+    {
+        "id": "T1558",
+        "name": "Steal or Forge Kerberos Tickets",
+        "title": "T1558: Steal or Forge Kerberos Tickets",
+        "count": 21
+    },
+    {
+        "id": "T1102",
+        "name": "Web Service",
+        "title": "T1102: Web Service",
+        "count": 201
+    },
+    {
+        "id": "T1046",
+        "name": "Network Service Discovery",
+        "title": "T1046: Network Service Discovery",
+        "count": 60
+    }
+]

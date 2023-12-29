@@ -1,0 +1,55 @@
+While Emotet has been around for many years and is one of the most well-known pieces of malware in the wild, that doesn't mean attackers don't try to freshen it up. Cisco Talos recently discovered several new campaigns distributing the infamous banking trojan via email. These new campaigns have been observed following a period of relatively low Emotet distribution activity, corresponding with the observance of Orthodox Christmas in certain geographic regions. These new malicious efforts involve sending victims malicious Microsoft Word attachments with embedded macros that download Emotet.
+
+This latest strain has also gained the ability to check if the infected IP where the malicious email is being sent from is already blocklisted on a spam list. This could allow attackers to deliver more emails to users' inboxes without any pushback from spam filters.
+
+Emotet Overview
+
+Emotet is one of the most widely distributed and actively developed malware families on the crimeware landscape today. It is a highly modular threat with a variety of payloads being delivered. Emotet began purely as a banking trojan, but over the years, has continued to evolve and more recently, has been associated with some larger-scale targeted Ryuk ransomware infections. The primary infection vector remains malicious emails sent as part of widespread spam campaigns. Emotet is commonly delivered via both macro-laden office documents, as well as URL-based spam messages that lead to an eventual infection. These campaigns change and evolve daily, and the supporting infrastructure also changes on a near constant basis. It's not uncommon to see Emotet reuse of some of the command and control (C2) servers over more extended periods.
+
+The goal of Emotet, as is the case with crimeware-based threats, is monetary. Attackers use Emotet to deliver modular payloads it can use to monetize infections. Those payloads can include threats like banking trojans, stealers, self-propagation, email harvesters and ransomware. The modules the attackers deploy are likely chosen based on the way they can best monetize infected systems and the environments in which those systems reside.
+
+Current Campaign Details
+
+There are multiple active campaigns currently delivering Emotet. These campaigns are occurring in two different varieties. The first is a simple email with a Word document attached. An example of one of these emails is shown below.
+
+One thing that Emotet typically does reasonably well is mutating the subject lines so that a large number of emails with identical subject lines are rarely seen during distribution. These campaigns are no exception — we have seen various subject lines focusing primarily around invoices and package deliveries. The emails also use different languages. Below you can see an example of one of the German language campaigns that are ongoing. This example also shows the second type of campaign, leveraging a direct URL download instead of Office documents with macros that fetch the malware.
+
+Once a user opens the email message and opens the attachment or clicks the link, malware is downloaded to the system using either code embedded in the attachment or directly from the website in the case of URL-based emails.
+
+Malicious code embedded in the malicious attachment functions as a downloader for the Emotet malware. When this code is executed, PowerShell is invoked, which reaches out to the Emotet malware distribution server, downloads the malicious payload, and executes it, thus infecting the system.
+
+In the screenshot above, you can see that the script is configured with multiple URLs that can be used to download the PE32 executable associated with Emotet. This provides resiliency, as the downloader can iterate through the list in the case that some of the URLs are no longer available due to takedown or compromised site cleanup.
+
+The malware is overwhelmingly hosted on compromised websites. These sites are then leveraged as random hosting locations for the campaigns to leverage. One unusual thing we have observed recently is the use of HTTP 301 redirects. The initial URL is requested with a connection keep-alive in the header. This initial HTTP request is met with a 301 pointing back to the same URL. This second request results in the malware being delivered and the header no longer includes the keep-alive. The reason for the 301 redirection and second request are currently unknown since browsing directly to the URL results in the malware being returned. Below is an example of the behavior.
+
+After initial installation, the C2 capabilities begin. Emotet connects to C2 servers on various ports including, but not limited to: 20, 80, 443, 7080, 8443, and 50000. Typically, this all occurs using HTTP traffic to hard-coded IP addresses similar to what is shown below:
+
+The above example demonstrates HTTP running on port 20 to one of those hard-coded IP addresses. There have been some more recent behavior changes, specifically around the spamming module of Emotet. Talos has observed recent runs of Emotet checking if the compromised system's IP address is currently found on many spam-related blocklists including those hosted by SpamCop, Spamhaus, and SORBS, among others. Below is a snippet from a ThreatGrid report that demonstrates the email blocklist queries.
+
+This is just the latest in a long line of near-constant improvements made to Emotet. It is still under constant development with new features being tested and rolled out on a continual basis. This development is one of the reasons why we see it being distributed so widely.
+
+Conclusion
+
+These modular malware families like Emotet are going to continue to increase in popularity as time goes on. Monetization is the name of the game when it comes to crimeware and having a malware family that can deliver multiple, disparate payloads are going to be increasingly attractive for those looking for nefarious monetary gain. As shown by the recent blocklist checking for the spamming module, Emotet is looking to maximize that financial gain whenever possible, and at the same time, minimize payloads that will have little return on investment. It's these types of changes that will continue to keep Emotet near the top of the crimeware landscape.
+
+Coverage
+
+Additional ways our customers can detect and block this threat are listed below.
+
+Advanced Malware Protection (AMP) is ideally suited to prevent the execution of the malware used by these threat actors.
+
+Cisco Cloud Web Security (CWS) or Web Security Appliance (WSA) web scanning prevents access to malicious websites and detects malware used in these attacks.
+
+Email Security can block malicious emails sent by threat actors as part of their campaign.
+
+Network Security appliances such as Next-Generation Firewall (NGFW), Next-Generation Intrusion Prevention System (NGIPS), andMeraki MX can detect malicious activity associated with this threat.
+
+AMP Threat Grid helps identify malicious binaries and build protection into all Cisco Security products.
+
+Umbrella, our secure internet gateway (SIG), blocks users from connecting to malicious domains, IPs, and URLs, whether users are on or off the corporate network.
+
+Open Source Snort Subscriber Rule Set customers can stay up to date by downloading the latest rule pack available for purchase on Snort.org.
+
+Indicators of Compromise
+
+A list of Indicators of Compromise (IOCs) associated with these campaigns can be obtained here.

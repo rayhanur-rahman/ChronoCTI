@@ -1,0 +1,9 @@
+Pawn Storm is an active and aggressive espionage actor group that has been operating since 2004. The group uses different methods and strategies to gain information from their targets, which are covered in our latest research. However, they are particularly known for dangerous credential phishing campaigns. In 2016, the group set up aggressive credential phishing attacks against the Democratic National Convention (DNC), German political party Christian Democratic Union (CDU), the parliament and government of Turkey, the parliament of Montenegro, the World Anti-Doping Agency (WADA), Al Jazeera, and many other organizations.
+
+This blog post discusses how Pawn Storm abused Open Authentication (OAuth) in advanced social engineering schemes. High profile users of free webmail were targeted by campaigns between 2015 and 2016.
+
+How is OAuth abused?
+
+OAuth is a way of authorizing third party applications to login to users’ online accounts for social media sites, gaming sites, and services like free webmail. The big advantage is that users don’t have to reveal their password; instead, the third party applications get a token that can be used for authentication.
+
+While OAuth offers convenience and can be usefully applied in different ways, it may also expose the user to risks. Threat actors can get through the background checks that service providers do before authorizing applications for OAuth use. These actors can then integrate OAuth into advanced social engineering schemes. Some internet service providers only require an email address and a website for third party applications to use OAuth. Because of these policies, experienced actor groups like Pawn Storm can take advantage of OAuth for their credential phishing schemes.

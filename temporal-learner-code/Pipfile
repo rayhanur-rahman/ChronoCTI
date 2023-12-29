@@ -1,0 +1,44 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pandas = "*"
+openpyxl = "*"
+cython = ">=0.25"
+pytest = "*"
+tokenizers = "*"
+spacy = "~=3.6"
+spacy-transformers = "*"
+scipy = "*"
+numpy = "*"
+scikit-learn = "*"
+transformers = "==4.30.2"
+networkx = "*"
+simpletransformers = "*"
+torch = "*"
+matplotlib = "*"
+torchmetrics = "*"
+dgl = "*"
+pyprobs = "*"
+imbalanced-learn = "*"
+scikit-multilearn = "*"
+skorch = "*"
+shap = "*"
+ipython = "*"
+scikit-llm = {extras = ["gpt4all"], version = "*"}
+jsonlines = "*"
+sentence-transformers = "*"
+pytorch-tabnet = "*"
+sklearn-genetic-opt = "*"
+seaborn = "*"
+more-itertools = "*"
+xgboost = "*"
+howso-engine = "*"
+
+[dev-packages]
+autopep8 = "*"
+
+[requires]
+python_version = "3.11"

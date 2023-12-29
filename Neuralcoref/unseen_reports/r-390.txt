@@ -1,0 +1,21 @@
+Analysis
+
+Also known as “Qakbot,” the Qbot banking trojan has been active since at least 2007. Initially focused on stealing user data and banking credentials, Qbot’s functionality has expanded to incorporate features such as follow-on payload delivery, command and control (C2) infrastructure, and anti-analysis capabilities.
+
+Qbot is typically delivered via an email-based distribution model, and in 2022 Qbot affiliates experimented with a variety of file types to deliver malicious payloads during their campaigns, likely in response to additional security controls implemented by Microsoft throughout the year. Examples of different delivery approaches include:
+
+Continuing from 2021, early 2022 brought Qbot in the form of malicious ZIP attachments containing a macro-laden XLS dropper.
+
+In April, researchers saw Qbot delivered via malicious MSI packages.
+
+In mid-May, multiple Red Canary customers received phishing emails with malicious ZIP files containing LNK files. The LNK files ran PowerShell commands to download and execute a Qbot DLL payload.
+
+In mid-2022 researchers observed Qbot operators rapidly altering the specifics of their payloads, sometimes changing file types or payloads day to day.
+
+In the later half of the year, adversaries used HTML smuggling to deliver malicious code via an HTML file attached to an email, which then downloaded a password-protected ZIP archive containing an ISO file. Qbot is also known to deliver ZIP archives with IMG, VHD, and VHDX disk images. Using a disk image file allows Qbot to bypass the Mark-of-the-Web (MOTW) feature because extracted or mounted files do not reliably inherit MOTW.
+
+Over the years, various groups have integrated Qbot into their operations. The Proofpoint-named groups TA577 and TA570 (which Red Canary assesses to be similar to Microsoft DEV-0450) are some of the most active Qbot malware affiliates. TA577 is also informally known as the “letters” affiliate based on the use of campaign IDs including letters such as AA or BB. TA570 is sometimes referred to as “presidents” because of the use of U.S. presidents’ names in its malware configuration, for example, a campaign identifier like obama225 . While Red Canary can not validate with high confidence that a specific group is present in an environment without obtaining a copy of the malware containing the campaign identifier, we did observe threats with similar naming schemes in our customers’ environments throughout 2022.
+
+Qbot is usually deployed as just one stage of an adversary’s playbook, with follow-on activity tied to the objectives of the affiliate group deploying it. While Red Canary does not observe a lot of post-Qbot activity, we know various ransomware affiliates have used it as an initial access vector in years prior, and 2022 was no different. This year Black Basta ransomware operators began leveraging Qbot to deploy command and control payloads such as Brute Ratel and Cobalt Strike.
+
+Historically, Qbot cycles between periods of intense activity followed by quiet, near-dormancy. A sharp increase in Qbot activity paired with changes to the malware—likely in an attempt to make it more challenging for defenders to detect—can signal the start of a new Qbot campaign. From 2021 to 2022, Red Canary observed several of these cycles.

@@ -1,0 +1,19 @@
+As featured in the 2018 State of Cybercrime Report released this week by Secureworks®, a small list of cybercrime malware is making the greatest impact in today's threat landscape, including — but not exclusively limited to — malware families like Emotet.
+
+Emotet is a modular downloader, deployed by financially motivated criminals to steal credentials, collect email addresses for use in spam campaigns, use a compromised host as a proxy or spam server, and install other payloads on the networks of unsuspecting organizations.
+
+One of the most dangerous capabilities that any downloader malware can have is the ability to propagate automatically to infect additional hosts within a network. If it can do that, it can increase the number of computers that have payloads delivered to them, causing victims greater disruption, higher cost, and increased difficulty in containing infections.
+
+In mid-2018, analysis by Secureworks Counter Threat Unit® (CTU®) researchers of one particular Emotet module explained how the malware was able to spread rapidly in some networks, but barely at all in others. The secret, it turned out, was a hardcoded list of passwords.
+
+Is Your Password on this List?
+
+Using this module, Emotet would attempt to spread automatically to other systems using Microsoft's Server Message Block (SMB) protocol. When challenged for a password it would attempt to guess the correct answer by iterating through a list of common passwords hardcoded into the module. The list, provided below for your reading pleasure, included basic numerical combinations ('123456789'), common names ('andrew'), popular cultural figures ('spiderman'), sports teams ('steelers'), and some colloquial terms that are far less acceptable in print… For those readers who are offended by inappropriate language: you have been warned!
+
+The malware only had to guess correctly once in order to infect the new computer, install itself as a service for persistence and attempt to spread to additional computers from there. The difference for organizations between having a password policy that forced users to have difficult- to- guess passwords versus having a weak password policy or no password policy at all was, in the case of Emotet, measured in terms of hundreds of infected computers, dozens of hours of incident response and tens or even hundreds of thousands of dollars.
+
+Proper credential management is a key recommendation that Secureworks incident responders find themselves often making in the aftermath of a breach. The experience of dealing with Emotet shows that it will be time well spent. We always recommend that clients adopt a policy that forces users to create passwords that they can remember, but that are hard to guess. (Combinations of words might work better for your employees than randomized 15 character alpha-numeric strings with special characters.) It's also important to use technical controls and user education to reduce the potential for password re-use, and to remind users that using their first name or their preferred swear word is probably making things a little too easy for the criminal. (Table 1 is case in point!)
+
+*TABLE 1 – Emotet Password List
+
+This list contains some passwords using explicit language, and those items have been redacted because they may be offensive to some readers. If you would like to check whether your password is on the actual list, you may access the unredacted list here.

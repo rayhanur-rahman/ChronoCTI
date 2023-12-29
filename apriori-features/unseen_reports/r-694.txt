@@ -1,0 +1,13 @@
+In our previous blog we described how the attackers controlled the Sunburst malware, and detailed a variety of commands that will result in data being sent to the threat actors. The next technique to discuss is how Sunburst sends this data to the attackers.
+
+If data is being sent to the attacker as a result of a command, instead of performing a HTTP(S) GET request, something we described in our last blog, Sunburst initiates a HTTP(S) POST request.
+
+Sunburst uses randomly generated URL paths for HTTP(S) POST requests that are different from HTTP(S) GET requests.
+
+If the data to send is greater than 10,000 bytes, the URL path will be as follows:
+
+/pki/crl/{0}{1}-{2}.crl element 0 is a number between 100 and 10,000 element 1 is optionally one of the following: -root -cert -universal_ca -ca -primary_ca -timestamp -global -secureca element 2 is the last error code
+
+
+
+A Content-Type header is set to application/octet-stream and the POST data follows. The POST data consists of the data to send UTF8 encoded, concatenated with the last error code, concatenated with the userid, and subsequently compressed. Every byte of the compressed blob is then summed and the lowest byte of the sum value is used as a key. The compressed blob is XOR’d by the key byte and the key byte is prepended to the encrypted data.

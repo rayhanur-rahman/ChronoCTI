@@ -1,0 +1,9 @@
+If the response from the C2 contains a value of p in the service tag received, then the malware will generate a new AES key and send it to the C2 in the same way as during the initial connection to the C2.
+
+A value of G in the head tag will make the malware send the string “Missed me? Interval=” with the currently configured value that is used by the malware to calculate wait intervals when receiving this command.
+
+A value of C in the head tag will check a <;title;> tag for the number of chunks the C2 wants to send to the malware and will receive data and store it for later use until the title tag value in a received message matches the desired number of chunks from the C2. This method will be used when the C2 wishes to send a large amount of data to the malware but does not want to alert network monitoring tools that a large data transfer is occurring.
+
+The service tag values, except for p, are used when interpreting the content of the data sent to the malware. The content of the data is stored in the Content segment of the 200 OK responses from the C2. The data in the content section is converted from the obfuscated format detailed in Table 1, base64 decoded and then decrypted using the AES key that was previously sent to the C2.
+
+Once all the data has been received and decoded from the C2, the malware will call a function called botlib.Work which is responsible for the malicious behaviour of this malware. This function handles the u, m, hi, fu, fd and pr service tags as well as having a default case where the service tag does not contain any data. The fu commands take the contents of the response from the C2 as the file to write and parses the service tag for the file name and path to use. The service tag is expected to be in the following format:

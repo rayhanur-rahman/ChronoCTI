@@ -1,0 +1,33 @@
+Ransomware is in constant state of development — this is true not only of ransomware families that are big-game hunters or ransomware families that have a targeted approach in their campaigns, but also for new ones.
+
+In this entry, we look into a new ransomware family dubbed Seth-Locker, which was discovered while at large and is still under development. We also enumerate developments in Babuk Locker, Maoloa, and a possible TeslaCrypt variant. Lastly, we note the appearance of a CobraLocker variant that is at large and uses a popular game as a disguise to attract the attention of unwitting victims.
+
+New ransomware Seth-Locker
+
+We discovered a new ransomware named Seth-Locker at large. An interesting feature of this new ransomware is its inclusion a few backdoor routines in its malicious files, together with its ransom routine. These backdoor routines that have been observed so far are the following:
+
+open_link for reading content from the command-and-control (C&C) server
+
+down_exec for downloading and execute a file
+
+shell to run a command line shell command
+
+locker to run the ransomware routine
+
+kill to terminate a process or itself
+
+Once executed, the ransomware follows the typical routine of encrypting files and appending them with the suffix .seth, before dropping a ransom note.
+
+As its code contains several rookie mistakes and oversights, we surmise that it is still under development. For example, malware commands are easily visible and repetitions of file extensions to be checked are in its code. Additionally, another tell-tale sign that it is still under development is that it lacks sophistication in hiding its routines and techniques. In the future, however, it would be possible to encounter an improved version of this ransomware.
+
+Developments in Babuk Locker
+
+Babuk Locker is also a new ransomware family and the first enterprise ransomware discovered in 2021. It initially identified itself as Vasa Locker in December 2020. Babuk Locker is proving to be a fast-evolving and active ransomware. Early into 2021, it had already attacked several companies, utilizing the strategy of threatening to expose stolen information.
+
+Even as a new ransomware-as-a-service (RaaS), its operations follow the methods of known targeted ransomware attacks. Its initial access likely involves compromised user accounts, exploitation of vulnerabilities, or malspam. Threat actors then move laterally to make an inventory of the victim’s network and important files since they exfiltrate data as part of their double extortion method. Afterward, they finally proceed to deploying their ransomware payload. In addition, they eventually post the exfiltrated data on a blog or a Tor site that they operate.
+
+Babuk Locker utilizes a ChaCha8 stream cipher for encryption and Elliptic-curve Diffie-Hellman (ECDH) for key generation, making the recovery of files without gaining access to the private key highly unlikely. Chuong Dong’s blog gives further details on how this malware operates.
+
+What’s notable about Babuk Locker is the progression of its attacks and its threat actors’ use of a Tor site to communicate with their victims. The oldest and first sample that we observed involved sending a typical ransom email to their target. Meanwhile, the second variant of the ransomware that we encountered used a Tor site, which showed a screenshot of the data that the threat actors had stolen from their target. Based on this development, we can see how the group behind Babuk Locker is making their extortion methods more personalized and aggressive.
+
+Certain aspects of Babuk Locker have similarities with other known ransomware. In particular, the ransom note is striking as it matches that used by DarkSide. This is evidenced in Figure 1, which suggests that these two ransomware families could be linked together. With regard to techniques, Babuk Locker also seems to have taken a page out of older ransomware like Conti, Ryuk, and Ragnar Locker. For example, like these older malware, it terminates processes and services that are related to applications, back-up software, endpoint security, and servers. Given how effective these known ransomware are, it is no surprise that Babuk Locker has mimicked some of their techniques.

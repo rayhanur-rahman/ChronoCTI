@@ -1,0 +1,193 @@
+Main description
+
+QakBot, also known as QBot, QuackBot and Pinkslipbot, is a banking Trojan that has existed for over a decade. It was found in the wild in 2007 and since then it has been continually maintained and developed.
+
+In recent years, QakBot has become one of the leading banking Trojans around the globe. Its main purpose is to steal banking credentials (e.g., logins, passwords, etc.), though it has also acquired functionality allowing it to spy on financial operations, spread itself, and install ransomware in order to maximize revenue from compromised organizations.
+
+To this day, QakBot continues to grow in terms of functionality, with even more capabilities and new techniques such as logging keystrokes, a backdoor functionality, and techniques to evade detection. It’s worth mentioning that the latter includes virtual environment detection, regular self-updates and cryptor/packer changes. In addition, QakBot tries to protect itself from being analyzed and debugged by experts and automated tools.
+
+Another interesting piece of functionality is the ability to steal emails. These are later used by the attackers to send targeted emails to the victims, with the obtained information being used to lure victims into opening those emails.
+
+QakBot infection chain
+
+QakBot is known to infect its victims mainly via spam campaigns. In some cases, the emails were delivered with Microsoft Office documents (Word, Excel) or password-protected archives with the documents attached. The documents contained macros and victims were prompted to open the attachments with claims that they contained important information (e.g., an invoice). In some cases, the emails contained links to web pages distributing malicious documents.
+
+However, there is another infection vector that involves a malicious QakBot payload being transferred to the victim’s machine via other malware on the compromised machine.
+
+The initial infection vectors may vary depending on what the threat actors believe has the best chance of success for the targeted organization(s). It’s known that various threat actors perform reconnaissance (OSINT) of target organizations beforehand to decide which infection vector is most suitable.
+
+QakBot infection chain
+
+The infection chain of recent QakBot releases (2020-2021 variants) is as follows:
+
+The user receives a phishing email with a ZIP attachment containing an Office document with embedded macros, the document itself or a link to download malicious document.
+
+The user opens the malicious attachment/link and is tricked into clicking “Enable content”.
+
+A malicious macro is executed. Some variants perform a ‘GET’ request to a URL requesting a ‘PNG’ However, the file is in fact a binary.
+
+The loaded payload (stager) includes another binary containing encrypted resource modules. One of the encrypted resources has the DLL binary (loader) which is decrypted later during runtime.
+
+The ‘Stager’ loads the ‘Loader’ into the memory, which decrypts and runs the payload during runtime. The configuration settings are retrieved from another resource.
+
+The payload communicates with the C2 server.
+
+Additional threats such as ProLock ransomware can now be pushed to the infected machine.
+
+Typical QakBot functions
+
+Typical QakBot malicious activity observed in the wild includes:
+
+Collecting information about the compromised host;
+
+Creating scheduled tasks (privilege escalation and persistency);
+
+Credentials harvesting: Credential dumping (Mimikatz, exe access)*; Password stealing (from browser data and cookies); Targeting web banking links (web injects)*.
+
+Password brute forcing;
+
+Registry manipulation (persistence);
+
+Creating a copy of itself;
+
+Process injection to conceal the malicious process.
+
+Communication with C2
+
+The QakBot malware contains a list of 150 IP addresses hardcoded into the loader binary resource. Most of these addresses belong to other infected systems that are used as a proxy to forward traffic to other proxies or the real С2.
+
+Communication with the С2 is a HTTPS POST request with Base64-encoded data. The data is encrypted with the RC4 algorithm. The static string “jHxastDcds)oMc=jvh7wdUhxcsdt2” and a random 16-byte sequence are used for encryption. The data itself is in JSON format.
+
+Original message in JSON format
+
+HTTPS POST request with encrypted JSON
+
+Usually, after infection the bot sends a ‘PING’ message, ‘SYSTEM INFO’ message and ‘ASK for COMMAND’ message, and the C2 replies with ‘ACK’ and ‘COMMAND’ messages. If additional modules were pushed by the C2, the bot sends a ‘STOLEN INFO’ message containing data stolen by the modules.
+
+‘PING’ message – bot request message to C2 with ‘BOT ID’ in order to check if С2 is active:
+
+‘PING’ message
+
+‘ACK’ message – C2 response message with field “16” containing the external IP address of the infected system, the only valuable information:
+
+‘ACK’ message
+
+‘SYSTEM INFO’ message – bot request message to C2 with information collected about the infected system. In addition to general system information such as OS version and bitness, user name, computer name, domain, screen resolution, system time, system uptime and bot uptime, it also contains the results of the following utilities and WMI queries: whoami /all arp -a ipconfig /all net view /all cmd /c set nslookup -querytype=ALL -timeout=10 _ldap._tcp.dc._msdcs.{DOMAIN} nltest /domain_trusts /all_trusts net share route print netstat -nao net localgroup qwinsta WMI Query ROOT\CIMV2:Win32_BIOS WMI Query ROOT\CIMV2:Win32_DiskDrive WMI Query ROOT\CIMV2:Win32_PhysicalMemory WMI Query ROOT\CIMV2:Win32_Product WMI Query ROOT\CIMV2:Win32_PnPEntity
+
+– bot request message to C2 with information collected about the infected system. In addition to general system information such as OS version and bitness, user name, computer name, domain, screen resolution, system time, system uptime and bot uptime, it also contains the results of the following utilities and WMI queries:
+
+‘SYSTEM INFO’ message
+
+‘ASK for COMMAND’ message – bot command request message to C2. After the ‘SYSTEM INFO’ message is sent, the bot starts asking the C2 for a command to execute. One of the main fields is “14” – the SALT. This field is unique and changes in every request. It is used to protect against hijacking or takeover of a bot. After receiving this request, the С2 uses the SALT in the signing procedure and places the signature in the response, so the bot can check the signed data. Only a valid and signed command will be executed.
+
+‘ASK for COMMAND’ message
+
+‘COMMAND’ message – C2 response message with command to execute. The current version of the bot supports 24 commands, most of them related to download, execution, drop of additional modules and module configuration files with different options, or setup/update configuration values.
+
+This type of message contains the signed value of the SALT (obtained from the bot’s request field “14”), COMMAND ID and MODULE ID. The other values of the message are not signed.In previous versions, the bot received modules and commands immediately after infection and sending a ‘SYSTEM INFO’ message. Now, the C2 responds with an empty command for about an hour. Only after that will the C2 send commands and modules in the response. We believe that this time delay is used to make it difficult to receive and analyze new commands and modules in an isolated controlled environment.
+
+‘COMMAND’ C2 response with empty command
+
+If the C2 pushes some modules, the Base64-encoded binary is placed into field “20” of the message.
+
+‘COMMAND’ C2 response with additional module to load
+
+‘STOLEN INFO’ message – bot message to C2 with stolen information like passwords, accounts, emails, etc. Stolen information is RC4 encrypted and Base64 encoded. The key for the RC4 encryption is generated in a different way and based on the infected system ID (aka Bot ID) values, and not based on a static string as in the case of traffic encryption.
+
+‘STOLEN INFO’ message
+
+Once communication with the C2 server has been established, QakBot is known to download and use additional modules in order to perform its malicious operations.
+
+The additional modules differ from sample to sample and may include: ‘Cookie grabber’, ‘Email Collector’, ‘Credentials grabber’, and ‘Proxy module’ among others.
+
+These modules may be written by the threat actors themselves or may be borrowed from third-party repositories and adapted. It can vary from sample to sample. For example, there are older samples that may use Mimikatz for credentials dumping.
+
+Below are some of the modules that we found during our research.
+
+Additional modules
+
+Cookie Grabber – collects cookies from popular browsers (Edge, Firefox, Chrome, Internet Explorer).
+
+Hidden VNC – allows threat actors to connect to the infected machine and interact with it without the real user knowing.
+
+Email Collector – tries to find Microsoft Outlook on the infected machine, then iterates over the software folders and recursively collects emails. Finally, the module exfiltrates the collected emails to the remote server.
+
+The threat actors distributed a debug version of the email collector module at some point
+
+Hooking module – hooks a hardcoded set of WinAPI and (if they exist) Mozilla DLL Hooking is used to perform web injects, sniff traffic and keyboard data and even prevent DNS resolution of certain domains. Hooking works in the following way: QakBot injects a hooking module into the appropriate process, the module finds functions from the hardcoded set and modifies the functions so they jump to custom code.
+
+The module contains a ciphered list of DLLs and functions that the bot will hook
+
+Passgrabber module – collects logins and passwords from various sources: Firefox and Chrome files, Microsoft Vault storage, etc. Instead of using Mimikatz as in previous versions, the module collects passwords using its own algorithms.
+
+Procedure that collects passwords from different sources
+
+Proxy module – tries to determine which ports are available to listen to using the UPnP port forwarding and tier 2 С2 query. Comparing current and old proxy loader versions revealed some interesting things: the threat actors decided to remove the cURL dependency from the binary and perform all HTTP communications using their own code. Besides removing cURL, they also removed OpenSSL dependencies and embedded all functions into a single executable – there are no more proxy loaders or proxy modules, it’s a single file now.
+
+UPnP port forwarding query construction
+
+After trying to determine whether ports are open and the machine could act as a C2 tier 2 proxy, the proxy module also starts a multithreaded SOCKS5 proxy server. The SOCKS5 protocol is encapsulated into the QakBot proxy protocol composed of: QakBot proxy command (1 byte), version (1 byte), session id (4 bytes), total packet length (dword), data (total packet length-10). Incoming and outgoing packets are stored in the buffers and may be received/transmitted one by one or in multiple packets in a single TCP data segment (streamed).
+
+The usual proxy module execution flow is as follows:
+
+Communicate with the C2, try to forward ports with UPnP and determine available ports and report them to the C2. The usual C2 communication protocol used here is HTTP POST RC4-ciphered JSON data. Download the OpenSSL library. Instead of saving the downloaded file, QakBot measures the download speed and deletes the received file. Set up external PROXY-C2 connection that was received with command 37 (update config)/module 274 (proxy) by the stager.
+
+Communicating with the external PROXY-C2:
+
+Send initial proxy module request. The initial request contains the bot ID, external IP address of the infected machine, reverse DNS lookup of the external IP address, internet speed (measured earlier) and seconds since the proxy module started. Establish a connection (proxy commands sequence 1->10->11) with the PROXY-C2. Initialize sessions, perform socks5 authorization with login/password (received from PROXY-C2 with command 10). Begin SOCKS5-like communication wrapped into the QakBot proxy module protocol.
+
+QakBot proxy commands are as follows:
+
+Command Description 1 Hello (bot->C2) 10 Set up auth credentials (C2->bot) 11 Confirm credentials setup (bot->C2) 2 Create new proxy session (C2->bot) 3 SOCKS5 AUTH (bot->C2) 4 SOCKS5 requests processing (works for both sides) 5 Close session (works for both sides) 6 Update session state/session state updated notification (works for both sides) 7 Update session state/session state updated notification (works for both sides) 8 PING (C2->bot) 9 PONG (bot->C2) 19 Save current time in registry (C2->bot)
+
+Parsed packets from C2
+
+Tracking single proxy
+
+Web inject – the configuration file for the hooking module
+
+Once communication with the C2 is established, one of the additional modules that is downloaded is the web-inject module. It intercepts the victim’s traffic by injecting the module into the browser’s process and hooking the network API. The hooking module gets the execution flow from intercepted APIs, and as soon as the victim accesses certain web pages related to banking and finance, additional JavaScript is injected into the source page.
+
+Fragment of JavaScript injected into the source page of the Wells Fargo login page
+
+QakBot statistics
+
+We analyzed statistics on QakBot attacks collected from our Kaspersky Security Network (KSN), where anonymized data voluntarily provided by Kaspersky users is accumulated and processed. In the first seven months of 2021 our products detected 181,869 attempts to download or run QakBot. This number is lower than the detection number from January to July 2020, though the number of users affected grew by 65% compared to the previous year and reached 17,316.
+
+Number of users affected by QakBot attacks from January to July in 2020 and 2021 (download)
+
+We observed the largest campaigns in Q1 2021 when 12,704 users encountered QakBot, with 8,068 Kaspersky users being targeted in January and 4,007 in February.
+
+Conclusions
+
+QakBot is a known Trojan-Banker whose techniques may vary from binary to binary (older and newer versions). It has been active for over a decade and doesn’t look like going away anytime soon. The malware is continuously receiving updates and the threat actors keep adding new capabilities and updating its modules in order to steal information and maximize revenue.
+
+We know that threat actors change how they perform their malicious activities based on security vendor activities, using sophisticated techniques to stay under the radar. Although QakBot uses different techniques to avoid detection, for example, process enumeration in order to find running anti-malware solutions, our products are able to detect the threat using behavior analysis. The verdicts usually assigned to this malware:
+
+Backdoor.Win32.QBot
+
+Backdoor.Win64.QBot
+
+Trojan.JS.QBot
+
+Trojan.MSOffice.QBot
+
+Trojan.MSOffice.QbotLoader
+
+Trojan.Win32.QBot
+
+Trojan-Banker.Win32.QBot
+
+Trojan-Banker.Win32.QakBot
+
+Trojan-Banker.Win64.QBot
+
+Trojan-Downloader.JS.QBot
+
+Trojan-PSW.Win32.QBot
+
+Trojan-Proxy.Win32.QBot
+
+Indicators of compromise (C2 server addresses)
+
+Can be performed as an external command (extended module).

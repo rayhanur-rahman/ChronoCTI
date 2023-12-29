@@ -1,0 +1,19 @@
+The cyber espionage group known as the Inception Framework has significantly developed its operations over the past three years, rolling out stealthy new tools and cleverly leveraging the cloud and the Internet of Things (IoT) in order to make its activities harder to detect.
+
+Since 2014, Symantec has found evidence of a steady stream of attacks from the Inception Framework targeted at organizations on several continents. As time has gone by, the group has become ever more secretive, hiding behind an increasingly complex framework of proxies and cloud services.
+
+History of stealthy attacks
+
+The Inception Framework has been active since at least May 2014 and its activities were first exposed by Blue Coat (now part of Symantec) in December 2014. Right from the start, the group stood out because of its use of an advanced, highly automated framework to support its targeted attacks. This level of sophistication is rarely seen, even in the targeted attacks sphere. The nature of Inception’s targets, from 2014 right through to today, along with the capabilities of its tools, indicate that espionage is the primary motive of this groups
+
+In 2014, Inception was compromising targeted organizations using spear-phishing emails, which masqueraded as legitimate emails concerning international policy, upcoming conferences, and specific sectoral interests of the targeted organization.
+
+More than half of the group’s earlier targets were in the Energy or Defense sectors, but it also targeted organizations in the Consultancy/Security, Aerospace, Research, and Media sectors, in addition to embassies. Its activities ranged across the globe, with targets located in South Africa, Kenya, the United Kingdom, Malaysia, Suriname, along with several other European and Middle Eastern countries.
+
+Word documents attached to Inception’s spear-phishing emails leveraged two Microsoft Office vulnerabilities (CVE-2014-1761 and CVE-2012-0158) to install malware on the recipient’s computer. The malware had a multi-staged structure that began with a malicious RTF document and ended with an in-memory DLL payload that communicated, via the WebDAV protocol, with a command and control (C&C) address from a legitimate cloud service provider (CloudMe.com). The name “Inception” comes from the group’s many levels of obfuscation and indirection it employed in delivering this payload.
+
+Further layers of obfuscation emerged when Blue Coat was able to determine that the attackers were communicating with CloudMe.com through a hacked network of compromised routers, the majority of which were located in South Korea.
+
+Stepping out of the shadows once again
+
+Following its exposure in late 2014, Inception fell quiet. However, this turned out to be only a brief hiatus and, by April 2015, there had been a resurgence in activity. Attacks have continued since then, right through to 2017.

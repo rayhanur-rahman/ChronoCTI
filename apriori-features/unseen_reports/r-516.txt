@@ -1,0 +1,103 @@
+In this report we will discuss a case from early August where we witnessed threat actors utilizing BazarLoader and Cobalt Strike to accomplish their mission of encrypting systems with Conti ransomware.
+
+The normal list of discovery tools were used during this case such as AdFind, Net, Ping, PowerView, and Nltest. Rclone was used to exfiltrate company data to Mega and Process Hacker was used to dump LSASS. The threat actors executed a Conti batch file on a server which then encrypted most of the domain joined systems.
+
+Case Summary
+
+In August, we witnessed an intrusion that started from a BazarLoader infection. A Phishing campaign distributing password-protected zip files with weaponized documents to victims was the likely delivery source. Macros inside the word document extracted and executed a malicious .HTA document, which downloaded and loaded the BazarLoader DLL in memory.
+
+It is now apparent to the information security community that intrusions starting with BazarLoader frequently end with Conti ransomware. This case saw such a conclusion. There are some evident similarities in cases that involve Conti ransomware. Ransomware operators’ tooling and overall tasks performed tend to match across the cluster. When we look at our earlier Conti case, this becomes noticeable. This could be due to the widely circulated Conti manual that was leaked by an affiliate. In this case, we saw the same pattern of events with tools like net, nltest, ShareFinder for discovery, Cobalt Strike for C2, and WMIC remote process creation for expanding their access within the network.
+
+Even though the intrusion lasted for five days total, Cobalt Strike and hands-on keyboard operators showed up in the first two hours of the intrusion. Straight away, they started gathering information to get the lay of the land using Net commands. Then they continued looking for open shares by executing the PowerView module, Invoke-ShareFinder.
+
+After collecting and dissecting the results from ShareFinder, they appeared to have a good understanding of the server and workstation layout of the organization as they started executing commands to gather information from specific, high-value servers. During that time, we saw errors when operators failed to alter specific parameters that indicate the operator is acting from a pre-defined playbook. They eventually decided to pivot laterally to a server using WMIC to execute a DLL Cobalt Strike beacon.
+
+Once they had access to the remote server via the Cobalt Strike beacon, they re-ran Invoke-ShareFinder and then exfiltrated data of interest from a different server using the Rclone application via the MEGA cloud storage service.
+
+On the second day, the threat actors used RDP to access the backup server and in doing so, reviewed the backup settings, and running processes on the server via the taskmanager GUI.
+
+On day four, the threat actors returned and ran another round of exfiltration using Rclone and MEGA again.
+
+On the fifth day, they moved fast towards their final objective, which was Conti ransomware. Before executing Conti, they used RDP to install and configure the AnyDesk remote desktop application. Having GUI access, they attempted to use ProcessHacker to dump the LSASS process. After this last step, they deployed Conti ransomware via a batch script to all domain joined systems.
+
+One interesting fact about this case is that the threat actors were not seen interacting with the Domain Controllers (DCs). Most ransomware cases we see involve the threat actor executing code on the DCs.
+
+Services
+
+We offer multiple services including a Threat Feed service which tracks Command and Control frameworks such as Cobalt Strike, Metasploit, Empire, PoshC2, BazarLoader, etc. More information on this service and others can be found here.
+
+The Cobalt Strike servers in this case were added to the Threat Feed on 5/20/21 and 08/03/21
+
+We also have artifacts and IOCs available from this case such as pcaps, memory captures, files, event logs including Sysmon, Kape packages, and more, under our Security Researcher and Organization services.
+
+Timeline
+
+Analysis and reporting completed by @Kostastsale, @pigerlin, and @_pete_0
+
+Reviewed by @TheDFIRReport
+
+MITRE ATT&CK
+
+Initial Access
+
+Thanks to @James_inthe_box for the sample!
+
+As with previously documented intrusions, a weaponized Microsoft Word document is used to lure the user into enabling a macro to execute the payload. The user is presented with the following:
+
+Reviewing the file we can observe that the filetype while labeled as a .doc file appears as XML when reviewing the file attributes.
+
+A deeper inspection shows the Word 2003 XML formatting and the contained macro.
+
+Once the macro has been enabled, in the next stage, an HTML Application (HTA) file is created and dropped into the user’s folder:
+
+Followed by the execution of the HTA:
+
+Analysis of the HTA file shows a mix of encoded HTML and JavaScript/VBScript code, not to mention profanity at the start of the file.
+
+The base64 encoded string can be decoded to:
+
+The code downloads a binary file (compareForfor.jpg) masquerading as a JPG (Image file) from millscruelg[.]com to the following folder “c:\users\public”, and incorporating VBScript code, utilizes REGSVR32 to execute this DLL.
+
+This initiates a connection to 64.227.65[.]60:443 and invokes a Svchost.exe, followed by a lookup to myexternalip[.]com to retrieve the external public-facing IPv4 address of the network. The attacker could use this information to verify the network being targeted and/or to facilitate tool configuration. Two DLLs were loaded via RunDll32 using the Svchost process. The first was D574.dll:
+
+Followed by D8B3.dll:
+
+D8B3.dll injected into the Winlogon process (high integrity):
+
+In the case of D8B3.dll, the DLL was Go compiled. Both DLLs had invalid certificates and could be detected by checking for any failed/revoked status.:
+
+Additionally, each DLL had no populated metadata relating to the DLL:
+
+The process hierarchy tree visualization below:
+
+This is very similar to the Bazarloader analysis by Brad Duncan on 11/08/2021.
+
+Persistence
+
+We observed the AnyDesk application created under the folder c:\users\<REDACTED>\Videos’, an unusual location and suspicious location for process activity – this is a good detection opportunity where portable executables appear on non-standard file system locations.
+
+AnyDesk is a closed source remote desktop application that is available for several operating systems. It is free for private use. We observed a long connection initiated from the AnyDesk application towards legitimately registered IPv4 ranges. However, we did not observe many events of interest during these sessions.
+
+Credential Access
+
+ProcessHacker was also dropped in the root of C:\ and likely used to access the LSASS process. The use of utilities such as ProcessHacker would be unusual for typical users, and applications from a C:\ root would also be suspicious in certain environments.
+
+Discovery
+
+Using the RunDLL32 and Winlogon process, we observed many typical host and network discovery commands utilizing living off the land techniques such as net, nltest, tasklist and time. Examples included:
+
+tasklist /s <REDACTED> net group "domain admins" /dom net localgroup "administrator" nltest /domain_trusts /all_trusts net view / all /domain net view / all time ping
+
+While running some of these commands, copy paste errors were present indicating the operator is likely working from a runbook, like the leaked Conti manual from August as seen via the tasklist /s ip rather than the actual host systems IP’s and seen right after this mistake.
+
+Cmd.exe process invoked a lot of the commands with unusual parent processes such as RunDLL32.exe. The example below using the time command:
+
+Red Canary provides a good detection guide for RunDLL32; this covers unusual RunDLL32 activity such as command less, unusual spawned activity, etc.
+
+Discovery command invocation:
+
+AdFind was observed via a file write for the binary, but there was no evidence of execution.
+
+File share enumeration was achieved using the PowerShell Invoke-ShareFinder script, part of PowerView.
+
+The output file was created at c:\ProgramData\found_shares.txt. The use of this tool has been observed in other recent intrusions. PowerShell was invoked by the WinLogon process and the resulting file created by Rundll32.exe

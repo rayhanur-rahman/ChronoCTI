@@ -1,0 +1,41 @@
+Cynet Detection Report: Ragnar Locker Ransomware
+
+Written by: Ben Gold
+
+EXECUTIVE SUMMARY
+
+Attackers first began using the Ragnar Locker ransomware towards the end of December 2019 as a way to attack compromised networks. Ragnar Locker is a ransomware that runs on Microsoft Windows. It specifically targets software commonly used by managed service providers to prevent their attack from being detected and stopped. It is aimed at English-speaking users.
+
+When the attackers first compromise a network, they will perform reconnaissance and pre-deployment tasks before executing the ransomware.
+
+CYNET DETECTION Cynet 360 protects your environment against this type of attack. This type of attack is detected by Cynet alerting you to the malicious activities, using the following mechanisms. Note that some of the actions are set to alert only, to not interrupt the ransomware’s flow, allowing Cynet to detect every step of Ragnar Locker Ransomware attack flow. MALICIOUS BINARY
+
+
+
+Fast Scan engine – This alert triggers when Cynet detects a file hash (SSDEEP) which is similar to a file hash that is flagged in our threat intelligence database as malicious. The idea behind this alert is to detect new variants of known malware. MEMORY PATTERN
+
+
+
+Default Configuration – This alert is triggered when Cynet detects memory strings which are associated with malware or with malicious files. RANSOMWARE HEURISTIC
+
+
+
+ADT – Advanced Detection Technology – This alert triggers when Cynet detects suspicious behavior which can be associated with Ransomware (such as changing file extensions to “.Lock”). MALICIOUS PROCESS COMMAND
+
+
+
+ADT – Advanced Detection Technology – This alert triggers when Cynet detects a CMD process which executes a command that contains suspicious arguments or is associated with malicious patterns. “VSSADMIN delete shadow /all” is an approach of ransomware in order to delete the shadow copies. Shadow Copy is a technology included in Microsoft Windows that can create backup copies or snapshots of computer files or volumes, even when they are in use. It is implemented as a Windows service called the Volume Shadow Copy service.
+
+INVESTIGATION OVERVIEW After execution, Ragnar Locker Ransomware encrypts the files and adds the extension “.ragnar” and an 8 digit number:
+
+When encrypting files, it will skip files in the following folders, file names, and extensions: kernel32.dll Windows Windows.old Tor browser Internet Explorer Google Opera Opera Software Mozilla Mozilla Firefox $Recycle.Bin ProgramData All Users autorun.inf boot.ini bootfont.bin bootsect.bak bootmgr bootmgr.efi bootmgfw.efi desktop.ini iconcache.db ntldr ntuser.dat ntuser.dat.log ntuser.ini thumbs.db .sys .dll .lnk .msi .drv .exe Once a computer’s files have been encrypted and renamed, it creates a ransom note at several directories – the ransom notes are named RGNR_25A5382C.txt. The note itself contains an email address to contact the cybercriminals who will provide a decryption tool once the victim sends them the Base64 code which also contains details of the infected host.
+
+RECOMMENDATIONS Use Cynet built-in remediation to isolate the host from the network.
+
+Delete all malicious payload associated with the Ransomware (rangar.exe).
+
+Use Cynet built-in remediation to prevent the malicious payload from running.
+
+Use Cynet Forensics to investigate the root-cause of this incident.
+
+Contact Cynet CyOps (Cynet Security Operations Center) The Cynet CyOps team is available to clients 24/7 for assistance with any issues, questions, or comments related to Cynet 360. For additional information, you may contact us directly at: Phone (US): +1-347-474-0048 Phone (EU): +44-203-290-9051 Phone (IL): +972-72-336-9736 CyOps Email: [email protected]

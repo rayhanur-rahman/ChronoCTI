@@ -1,0 +1,9 @@
+Infection Channel: Propagates via network shares, Propagates via software vulnerabilities, Propagates via removable drives
+
+The first variant of the CONFICKER malware family was seen propagating via the MS08-067 Server service vulnerability back in 2008. Other variants after the first CONFICKER worm spread to other machines by dropping copies of itself in removable drives and network shares.
+
+What makes CONFICKER notable is the fact that most of these worms are capable of generating hundreds of URLs that it connects to. It attempts to connect to a randomly-generated URL, which it created using its own domain-generation algorithm, to download additional files to infected systems.
+
+Part of the difficulty of removing a CONFICKER infection is its capability to block access to security and antivirus-related websites. Also, the AUTORUN feature on Windows systems, which is enabled by default, allowed easy propagation and execution when a CONFICKER-infected USB is plugged in to a clean machine. To add to this, there was a significant number of machines that were not patched because of various reasons - some were revealed to be because of piracy, others were legacy systems running old programs that were only supported by older Windows operating systems.
+
+The CONFICKER infection brought to light many security issues that were later actively addressed by updates in newer Windows operating systems. It also highlighted the need to patch and the need for better management of legacy systems, especially those systems that are hooked up to a company's network.

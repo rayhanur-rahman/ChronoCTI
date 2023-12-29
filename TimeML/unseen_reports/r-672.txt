@@ -1,0 +1,117 @@
+Previously, we explained about malware "TSCookie" and "PLEAD" which are used by an attack group BlackTech. Their activities have been continuously observed in Japan as of now. We have been seeing that a new malware variant is being used after they successfully intruded into a target network. This article explains the details of the variant.
+
+TSCookie used after intrusion
+
+The malware consists of 2 files (TSCookie Loader and TSCookie) as in Figure 1.
+
+Figure 1: Overview of TSCookie Loader and TSCookie
+
+TSCookie Loader is either in EXE or DLL format, and it reads and executes specific files stored in the same folder or the following locations. (The folders may vary depending on the sample.)
+
+C:\Windows
+
+C:\ProgramData\Microsoft
+
+C:\Users\Public\Documents
+
+C:\Program Files\Internet Explorer
+
+It reads files that match the following file names:
+
+desktop.db
+
+Files with name that match 7???. (wildcard)
+
+Files with name that match 8???. (wildcard)
+
+For example, files names such as KB78E7269.log and PM89E7267.xml have been confirmed.
+
+TSCookie is RC4-encrypted and can be decoded by TSCookie Loader before being executed on the memory. TSCookie itself is a downloader and operates according to modules downloaded from an external server. Some characteristics such as configuration and communication protocols differ between TSCookie and the variant.
+
+Details of TSCookie behaviour is described in the following section.
+
+TSCookie behaviour
+
+TSCookie supports multiple communication protocols (HTTP, HTTPS and custom protocol). The protocol that each sample uses is described in its configuration. (Please see Appendix A for the details of the configuration.)
+
+If it is configured to use HTTP protocol, the following HTTP POST request is sent:
+
+POST /index?o=E7E168C4EC82E HTTP/1.1 Cache-Control: no-cache Pragma: no-cache Accept: */* User-Agent: Mozilla/4.0 (compatible; MSIE 8.0; Win32) Proxy-Connection: Keep-Alive Content-Length: [size] Host: [host name] [Data]
+
+There are several patterns of URL path, which are dynamically created with the following random strings and values. (Some of them are described with format specifiers. Other patterns also exist.)
+
+/news?%c=%X%X
+
+/index?%c=%X%X
+
+/?id=%X%X
+
+/Default.aspx?%c=%X%X
+
+/m%u.jsp?m=%d
+
+/N%u.jsp?m=%d
+
+Sent data is RC4-encrypted. Please see Table B-1 and B-2 in Appendix B for the format of the data.
+
+Data downloaded by the HTTP POST request is RC4-encrypted by the 8-byte value consisting of the RC4 key (Table A-1 in Appendix A) and another value in the received data (RC4 key as in Table B-3 in Appendix B). The downloaded data contains modules, and they are executed on the memory.
+
+TSCookie decoding tool
+
+We have developed a tool to decode TSCookie files and extract configuration. This is available on GitHub for your use.
+
+JPCERTCC/aa-tools - GitHub
+
+https://github.com/JPCERTCC/aa-tools/blob/master/tscookie_data_decode.py
+
+In closing
+
+We have received many reports about TSCookie infection. Please make sure that there is no infection in your organisation, referring to the file names and communication protocols described in this article. The hash value of the samples described in this article are listed in Appendix C.
+
+Shusei Tomonaga
+
+(Translated by Yukako Uchida)
+
+Appendix A: TSCookie Configuration
+
+Table A: Configuration Offset Contents Remarks 0x000 Destination server and port number Multiple hosts can be specified by listing with a semicolon ";" 0x400 RC4 key Used for encryption 0x404 Sleep times 0x42C Mutex 0x44C Communication mode - 1,2,3: HTTP protocol supporting authentication proxy
+
+- 6,7,8: HTTPS protocol
+
+- 0: Custom protocol
+
+- 5: HTTP protocol 0x454 HTTP connection keep 0x458 ICMP recipient setting Receive information of the destination server by ICMP 0x4D4 IP address to receive ICMP communication 0x624 Process injection mode - 0: Launch
+
+- 1: Already running
+
+- 2: Launch offset 0x62C 0x628 Process to be injected - 0: svchost.exe
+
+- 1: iexplorer.exe
+
+- 2: explorer.exe
+
+- 3: Default Browser
+
+- 4: Process in offset 0x62C 0x62C Process name 0x72C Proxy server 0x76C Proxy port number 0x770 Proxy username 0x790 Proxy password 0x7B0 Proxy mode - 1: Use configuration data
+
+- 0: Detect Proxy automatically 0x7B4 Proxy authentication process AuthScheme
+
+Some samples may not inject processes.
+
+Appendix B: Data exchanged by TSCookie
+
+Table B-1: Format of sent data Offset Length Contents 0x00 4 Number of received data (begins with 0xFFFFFFFF) 0x04 4 Length of data sent 0x08 4 Times of communication 0x0C 4 Fixed value (Set to 0x5322 at the beginning, then to 0x5324 or 0x5325 while receiving modules) 0x1C 4 Random data (RC4 key) 0x20 - Random data after first communication (See Table B-2 for first communication)
+
+Up to offset 0x1C, the contents are RC4-encrypted with the key in the configuration and random data.
+
+Table B-2: Data format of first communication after offset 0x20 Offset Length Contents 0x00 4 0x9A65001E 0x04 4 Process ID 0x08 4 0x5322 0x0C 4 Random data 0x10 4 Data size from offset 0x14 0x14 - Random data (RC4 key)
+
+Up to offset 0x14, the contents are RC4-encrypted with the key in the configuration and random data.
+
+Table B-3: Format of received data Offset Length Contents 0x00 4 Number of received data 0x04 4 Length of received data 0x0C 4 - 0x10 4 Whether the contents from offset 0x20 is encrypted 0x1C 4 RC4 key 0x20 - Module data
+
+Up to 0x1C, the contents are RC4-encrypted with the key contained in the configuration and another key in the received data.
+
+Appendix C: SHA-256 value of the samples
+
+TSCookie Loader

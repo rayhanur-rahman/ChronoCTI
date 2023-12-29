@@ -1,0 +1,13 @@
+The DDE protocol can be used for legitimate purposes to send messages between Microsoft applications that share data through shared memory, e.g. to share data between Excel and Word.
+
+However, the DDE protocol was flagged as unsecure last year, when researchers discovered it could be exploited to execute code on victim machines via Excel and Word, without macros being enabled in those applications. Microsoft said at the time that this capability was a feature and the company did not consider it a vulnerability because Office always warned users before enabling DDE in documents, as seen in Figure 1. However, after the DDE protocol was subsequently exploited in a number of malware campaigns, Microsoft issued an update to Office in December 2017 that disabled DDE by default in Word and Excel. DDE can be enabled manually after this update is applied but only if the registry is altered by an admin account.
+
+The Gallmaker victims we have seen did not have this patch installed and therefore were still vulnerable to exploit via the DDE protocol.
+
+Targets and timeline
+
+Gallmaker’s activity appears to be highly targeted, with its victims all related to government, military, or defense sectors. Several targets are embassies of an Eastern European country. The targeted embassies are located in a number of different regions globally, but all have the same home country.
+
+The other targets we have seen are a Middle Eastern defense contractor and a military organization. There are no obvious links between the Eastern European and Middle Eastern targets, but it is clear that Gallmaker is specifically targeting the defense, military, and government sectors: its targets appear unlikely to be random or accidental.
+
+Gallmaker’s activity has been quite consistent since we started tracking it. The group has carried out attacks most months since December 2017. Its activity subsequently increased in the second quarter of 2018, with a particular spike in April 2018.

@@ -1,0 +1,19 @@
+A large-scale attack campaign is targeting multiple Japanese companies, including subsidiaries located in as many as 17 regions around the globe in a likely intelligence-gathering operation.
+
+Companies in multiple sectors are targeted in this campaign, including those operating in the automotive, pharmaceutical, and engineering sector, as well as managed service providers (MSPs).
+
+The scale and sophistication of this attack campaign indicates that it is the work of a large and well-resourced group, with Symantec, a division of Broadcom (NASDAQ: AVGO), discovering enough evidence to attribute it to Cicada (aka APT10, Stone Panda, Cloud Hopper). Cicada has been involved in espionage-type operations since 2009, and U.S. government officials have linked the activities of APT10, which we track as Cicada, to the Chinese government.
+
+Cicada has historically been known to target Japan-linked organizations, and has also targeted MSPs in the past. The group is using living-off-the-land tools as well as custom malware in this attack campaign, including a custom malware - Backdoor.Hartip - that Symantec has not seen being used by the group before. Among the machines compromised during this attack campaign were domain controllers and file servers, and there was evidence of files being exfiltrated from some of the compromised machines.
+
+The attackers extensively use DLL side-loading in this campaign, and were also seen leveraging the ZeroLogon vulnerability that was patched in August 2020.
+
+How was this campaign discovered?
+
+This campaign was first discovered by Symantec when suspicious DLL side-loading activity on one of our customer’s networks triggered an alert in our Cloud Analytics technology, which is available in Symantec Endpoint Security Complete (SESC). This activity was then reviewed by our Threat Hunter analysts before being passed on to our investigations team for further analysis.
+
+Cloud Analytics leverages artificial intelligence in order to comb through Symantec’s vast data and spot patterns associated with targeted attacks. It is capable of automatically flagging incidents that would otherwise have taken thousands of hours of analyst time to identify. The initial Cloud Analytics alert allowed our threat hunting team to identify further victims of this activity, build a more complete picture of this campaign, and attribute this activity to Cicada. It also allowed us to update and create new protections to ensure our customers are protected from this activity.
+
+Victims
+
+This campaign has been ongoing since at least mid-October 2019, right up to the beginning of October 2020, with the attack group active on the networks of some of its victims for close to a year. The campaign is very wide-ranging, with victims in a large number of regions worldwide.

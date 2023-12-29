@@ -1,0 +1,61 @@
+Retooled
+
+Waterbug’s most recent campaigns have involved a swath of new tools including custom malware, modified versions of publicly available hacking tools, and legitimate administration tools. The group has also followed the current shift towards “living off the land,” making use of PowerShell scripts and PsExec, a Microsoft Sysinternals tool used for executing processes on other systems.
+
+Aside from new tools already mentioned above, Waterbug has also deployed:
+
+
+
+A new custom dropper typically used to install Neptun as a service.
+
+A custom hacking tool that combines four leaked Equation Group tools (EternalBlue, EternalRomance, DoublePulsar, SMBTouch) into a single executable.
+
+A USB data collecting tool that checks for a connected USB drive and steals certain file types, encrypting them into a RAR file. It then uses WebDAV to upload to a Box cloud drive.
+
+Visual Basic scripts that perform system reconnaissance after initial infection and then send information to Waterbug command and control (C&C) servers.
+
+PowerShell scripts that perform system reconnaissance and credential theft from Windows Credential Manager and then send this information back to Waterbug C&Cs.
+
+Publicly available tools such as IntelliAdmin to execute RPC commands, SScan and NBTScan for network reconnaissance, PsExec for execution and lateral movement, and Mimikatz (Hacktool.Mimikatz) for credential theft, and Certutil.exe to download and decode remote files. These tools were identified being downloaded via Waterbug tools or infrastructure.
+
+Victims
+
+These three recent Waterbug campaigns have seen the group compromise governments and international organizations across the globe in addition to targets in the IT and education sectors. Since early 2018, Waterbug has attacked 13 organizations across 10 different countries:
+
+The Ministry of Foreign Affairs of a Latin American country
+
+The Ministry of Foreign Affairs of a Middle Eastern country
+
+The Ministry of Foreign Affairs of a European country
+
+The Ministry of the Interior of a South Asian country
+
+Two unidentified government organizations in a Middle Eastern country
+
+One unidentified government organization in a Southeast Asian country
+
+A government office of a South Asian country based in another country
+
+An information and communications technology organization in a Middle Eastern country
+
+Two information and communications technology organizations in two European countries
+
+An information and communications technology organization in a South Asian country
+
+A multinational organization in a Middle Eastern country
+
+An educational institution in a South Asian country
+
+Hijacked infrastructure
+
+One of the most interesting things to occur during one of Waterbug’s recent campaigns was that during an attack against one target in the Middle East, Waterbug appeared to hijack infrastructure from the Crambus espionage group and used it to deliver malware on to the victim’s network. Press reports have linked Crambus and Waterbug to different nation states. While it is possible that the two groups may have been collaborating, Symantec has found no further evidence to support this. In all likelihood, Waterbug’s use of Crambus infrastructure appears to have been a hostile takeover. Curiously though, Waterbug also compromised other computers on the victim’s network using its own infrastructure.
+
+During this attack, a customized variant of the publicly available hacking tool Mimikatz was downloaded to a computer on the victim’s network from known Crambus-controlled network infrastructure. Mimikatz was downloaded via the Powruner tool and the Poison Frog control panel. Both the infrastructure and the Powruner tool have been publicly tied to Crambus by a number of vendors. Both were also mentioned in recent leaks of documents tied to Crambus.
+
+Symantec believes that the variant of Mimikatz used in this attack is unique to Waterbug. It was heavily modified, with almost all original code stripped out aside from its sekurlsa::logonpasswords credential stealing feature. Waterbug has frequently made extensive modifications to publicly available tools, something Crambus is not well known for.
+
+The variant of Mimikatz used was packed with a custom packing routine that has not been seen before in any non-Waterbug malware. Waterbug used this same packer on a second custom variant of Mimikatz and on a dropper for the group’s custom Neuron service (Trojan.Cadanif). Its use in the dropper leads us to conclude that this custom packer is exclusively used by Waterbug. Additionally, this version of Mimikatz was compiled using Visual Studio and the publicly available bzip2 library which, although not unique, has been used by other Waterbug tools previously.
+
+Aside from the attack involving Crambus infrastructure, this sample of Mimikatz has only been seen used in one other attack, against an education target in the UK in 2017. On that occasion, Mimikatz was dropped by a known Waterbug tool.
+
+In the case of the attack against the Middle Eastern target, Crambus was the first group to compromise the victim’s network, with the earliest evidence of activity dating to November 2017. The first observed evidence of Waterbug activity came on January 11, 2018, when a Waterbug-linked tool (a task scheduler named msfgi.exe) was dropped on to a computer on the victim’s network. The next day, January 12, the aforementioned variant of Mimikatz was downloaded to the same computer from a known Crambus C&C server. Two further computers on the victim’s network were compromised with Waterbug tools on January 12, but there is no evidence that Crambus infrastructure was used in these attacks. While one of these computers had been previously compromised by Crambus, the other showed no signs of Crambus intrusion.

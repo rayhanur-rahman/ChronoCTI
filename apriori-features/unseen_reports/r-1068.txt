@@ -1,0 +1,19 @@
+On receipt of a message with rc in the title tag it will check the Q folder to see if there is a folder with the same name as the hash that is in the head tag of the rc message. If there is, then it expects there to be a subfolder which contains an arbitrary amount of *.tmp files.
+
+The *.tmp files are expected to have contents with newline separated data of:
+
+A base64 encrypted cookie; and,
+
+An obfuscated string to be sent as the content of the 200 OK response.
+
+The obfuscated string has the same format of character replacement and splitting into space separated chunks as described in our previous reporting[5] and is either random data or AES encrypted data depending on the command specified in the cookie.
+
+If there is only one *.tmp file in the Q subfolder, then the server will send it with the command specified in the encrypted first line as the Set-Cookie content and the data in the second line to be sent as the body of the POST request. If there are multiple files in the subfolder, then the server will instead send the files as part of a chunked C command.
+
+The rs command checks the A folder to see if there are any directories containing .tmp files and if it finds any then sends all the .tmp files in the first folder found. It uses the first line of the found file as the Set-Cookie data as in the rc command but also RC6 encrypts and obfuscates the file path of the file that is being sent and puts it at the start of the content of the POST request, along with the remaining lines of the file to be sent.
+
+The rsc and rcc commands do the same operations as the rs and rc commands respectively, but they also allow the service tag to specify the file path that is to be used to read data from.
+
+The del command takes a file path in the service tag as the location on the server of a file to delete. If after deleting the file, the folder it was in is empty, then the folder is also deleted.
+
+In HTTPS mode the server has a hardcoded Certificate Authority (CA) certificate that it uses to verify any certificates that connect to the server. In practice, the certificates of both the server and anyone communicating with it will need to be signed by the same CA. This is due to the fact that the embedded CA certificate in this sample has details, described in Table 2, that match the CA certificate details used in the WellMess backdoors.

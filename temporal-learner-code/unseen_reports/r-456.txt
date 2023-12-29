@@ -1,0 +1,77 @@
+In the past months, the Cybereason Nocturnus team has been tracking the activity of the Cl0p ransomware, a variant of CryptoMix ransomware. The name “clop” comes from Russian or Bulgarian, and means “bug”.
+
+Key Findings
+
+Evolving Threat: TA505 have evolved their attack tactics, delivering Cl0p ransomware as the final payload on as many systems as possible in order to pressure the victim to pay the ransom - non-paying Cl0p victims’ data is being published on the Cl0p leaks site
+
+Multi-Staged Attack: Before deploying Cl0p, two prior payloads are deployed to allow the attackers to move laterally within the compromised network before downloading and deploying the Clop ransomware.
+
+High Severity: The Cybereason Nocturnus Team assesses the threat level as HIGH given the destructive potential of the attacks.
+
+Detected and Prevented: The Cybereason Defense Platform fully detects and prevents the Cl0p ransomware.
+
+Background
+
+In 2019, the TA505 threat actor started delivering Cl0p as their final payload. TA505 is a well known sophisticated cybercrime threat actor, attacking various sectors for financial gain.
+
+In 2019, the TA505 group changed their main strategy into encrypting assets in a corporate network and demanding a Bitcoin ransom for the decryption key.
+
+A more recent Cl0p attack was against AG, a large German software company. Their internal network was breached, and the attackers demanded more than $20 million ransom. In another case, the group attacked a South Korean retailer, demanding $40 million ransom this time, and threatening to leak 2 million cards in case the negotiation fails.
+
+Moreover, the group maintains a site where they leak data of victims who did not pay the ransomware:
+
+A Screenshot from the Cl0p leaks website
+
+The infection chain is as follows, and depicted below: First of all, when a malspam campaign is launched, emails are sent to victims from compromised accounts, thus increasing their credibility. The emails contain an HTML attachment that redirects to a compromised website.
+
+It then delivers a document containing a malicious macro that drops the Get2 loader. Get2 downloads and executes SDBbot, FlawedGrace or FlawedAmmy. In this scenario, SDBbot moves laterally within the compromised network, exfiltrates data, and finally downloads and deploys the Cl0p ransomware on as many systems as possible:
+
+The Cl0p attack tree
+
+Cl0p Ransomware Analysis
+
+The Cl0p ransomware is initially packed and compressed. It unpacks a shellcode to resolve several APIs such as GetProcAddress and VirtualAlloc:
+
+The shellcode responsible for loading the compressed PE
+
+The shellcode then allocates memory and writes an aPLib compressed PE. It can be recognized by the first bytes, M8Z:
+
+The compressed PE as seen in memory
+
+Once the unpacked and decompressed payload is revealed, Cl0p has some indicative mutexes in its variants. After creating the mutex, BestChangeT0p^_-666 in this case, Cl0p searches for various security products installed on the victim’s machine, and uninstalls or disables them if necessary to avoid being detected or terminated:
+
+Disabling Malwarebytes’ Anti-Ransomware notifications
+
+In the example above, Cl0p searches for Malwarebytes anti ransomware protection and disables its notifications so the user will not be alerted. Below, if an ESET product is detected, it will be uninstalled using the command line:
+
+Uninstalling an ESET Security product
+
+Other newer variants disable Windows defender through silent command line modification of registry keys, and is also uninstalling the Microsoft Security Essentials client. Cybereason detects the malicious sample execution together with all of the listed commands:
+
+Disabling Windows Defender as seen in the Cybereason attack tree
+
+One of the Cl0p variants encrypts the files by generating an RSA public key, retrieving its first 127 bytes and using them as the RC4 key, adding the Cl0p^_- header and the RC4 encrypting it again. Once the files are encrypted, the Cl0p extension will be added to each encrypted file:
+
+A file encrypted by Cl0p together with the ransom note
+
+In addition, a ransomware note is placed in the folder:
+
+Cl0p’s ransom note content
+
+Cybereason Detection and Prevention
+
+The analyzed sample below, a newer variant of Cl0p, disables Windows Defender in the beginning of its execution. Cybereason detects the malicious commands executed to silently modify related registry keys:
+
+Windows Defender registry keys modification as seen in Cybereason
+
+When Cybereason anti-ransomware prevention is turned on, the execution of the sample is successfully prevented:
+
+Prevention of Cl0p’s execution in Cybereason
+
+Indicators of Compromise
+
+IOC Type Description 08576e51a724bdc648c40e0dfe3c12a61e7517ca 8e56837e4d748eceb991aabd8f5a7f3c874f7010 fb66c66cd8fa805394ec7b2253238dfee89b2964 ccd147cea99c1b2e15f193a761f7a5be8da850e8 16f48624ea2a575e1bdceb4ac6151d97d4de80b6 2d92a9ec1091cb801ff86403374594c74210cd44 ab265e2897c3befea9e37b5d8b06d8afd48b0fa6 fdd274aeb22c1b8ade68b02c50f9fead0395ea64 2b44afeb746cef483929fb04f15479083ce71323 b020dbb06b2689d325e5e89fe3a66c1af7cd1597 9d97ae1a629fe2ed0ce750d1da1513c5dbf9cf8b 18281511117e39d2dc0546f110ec3aa922ea4340 e4fdc793161403a19de938288fa261b34e0444c0 0a7ab8cc60b04e66be11eb41672991482b9c0656 a6ae538be9407352f1e182ec38ad3c0b5277c8fc SHA1 Clop executable
+
+MITRE ATT&CK BREAKDOWN
+
+Daniel Frank
